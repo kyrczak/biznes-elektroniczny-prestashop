@@ -1,0 +1,40 @@
+version: '3'
+services:
+  mariadb:
+    container_name: mariadb
+    image: mariadb:10
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: prestashop
+    networks:
+      - my-network
+    volumes:
+      - ./mariadb/db_dump:/docker-entrypoint-initdb.d
+      - ./mariadb:/var/lib/mysql
+
+  prestashop:
+    container_name: prestashop
+    image: prestashop/prestashop:1.7.8.10-apache
+    restart: always
+    ports:
+      - 8080:80
+    depends_on:
+      - mariadb
+    environment:
+      DB_SERVER: mysql
+      DB_NAME: prestashop￼
+      DB_USER: root
+      DB_PASSWD: admin
+      PS_DOMAIN: localhost:8080
+      PS_FOLDER_ADMIN: admin
+      PS_FOLDER_INSTALL: install
+      PS_INSTALL_AUTO: 0
+      PS_LANGUAGE: pl
+      PS_COUNTRY: PL
+    networks:
+      - my-network
+    volumes:
+      - ./prestashop/src:/var/www/html
+networks:
+    my-network:
