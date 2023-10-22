@@ -1,6 +1,7 @@
-/scrapper/venv
-/scrapper/
-/scrapper/
 /mariadb/
 /prestashop/
 /.vscode/
+*/venv/
+**/*.conf
+**/*.json
+**/__pycache__/
