@@ -4,8 +4,7 @@
 # commonly used. You can find more settings consulting the documentation:
 #
 #     https://docs.scrapy.org/en/latest/topics/settings.html
-#     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
-#     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
+#     https://docs.scrapy.org/en/latest/topics/EED_EXPORT_FIELDS = ['id', 'price', 'name', 'category', 'manufacturer']cs/spider-middleware.html
 
 BOT_NAME = "donice_scrapper"
 
@@ -20,7 +19,7 @@ NEWSPIDER_MODULE = "donice_scrapper.spiders"
 ROBOTSTXT_OBEY = True
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-#CONCURRENT_REQUESTS = 32
+CONCURRENT_REQUESTS = 250
 
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
@@ -90,3 +89,6 @@ ITEM_PIPELINES = {'donice_scrapper.pipelines.DoniceScrapperPipeline': 300}
 REQUEST_FINGERPRINTER_IMPLEMENTATION = "2.7"
 TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 FEED_EXPORT_ENCODING = "utf-8"
+
+
+FEED_EXPORT_FIELDS = ['id', 'price', 'name', 'category', 'manufacturer']

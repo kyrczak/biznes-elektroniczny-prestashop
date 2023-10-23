@@ -8,9 +8,8 @@
 import scrapy
 from scrapy import Request
 from scrapy.pipelines.images import ImagesPipeline
+import time
 
-
-import os
 class DoniceScrapperPipeline(ImagesPipeline):
     def get_media_requests(self, item, info):
         print(f"Downloading images for item with ID: {item['id']} and URLs: {item['image_urls']}")
@@ -20,7 +19,10 @@ class DoniceScrapperPipeline(ImagesPipeline):
     def file_path(self, request, response=None, info=None, *, item=None):
         item = request.meta['item']
         image_guid = item['id']
-        return f'full/{image_guid}.jpg'  # Adjust this as needed
+        timestamp = int(time.time())
+        return f'full/{image_guid}/{image_guid}_{timestamp}.jpg'
+    
+
     
     def item_completed(self, results, item, info):
         return item
