@@ -53,7 +53,7 @@ ROBOTSTXT_OBEY = True
 #DOWNLOADER_MIDDLEWARES = {
 #    "donice_scrapper.middlewares.DoniceScrapperDownloaderMiddleware": 543,
 #}
-
+MEDIA_ALLOW_REDIRECTS = True
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
 #EXTENSIONS = {
@@ -62,10 +62,9 @@ ROBOTSTXT_OBEY = True
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    "donice_scrapper.pipelines.DoniceScrapperPipeline": 300,
-#}
-
+IMAGES_STORE = 'images'  # folder name or path where to save images
+#DOWNLOAD_DELAY = 1  # delay in downloading images
+ITEM_PIPELINES = {'donice_scrapper.pipelines.DoniceScrapperPipeline': 300}
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
 #AUTOTHROTTLE_ENABLED = True

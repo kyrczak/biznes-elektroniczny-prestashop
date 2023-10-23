@@ -5,3 +5,4 @@
 **/*.conf
 **/*.json
 **/__pycache__/
+**/images/

@@ -5,9 +5,22 @@
 
 
 # useful for handling different item types with a single interface
-from itemadapter import ItemAdapter
+import scrapy
+from scrapy import Request
+from scrapy.pipelines.images import ImagesPipeline
 
 
-class DoniceScrapperPipeline:
-    def process_item(self, item, spider):
+import os
+class DoniceScrapperPipeline(ImagesPipeline):
+    def get_media_requests(self, item, info):
+        print(f"Downloading images for item with ID: {item['id']} and URLs: {item['image_urls']}")
+        for image_url in item['image_urls']:
+            yield Request(image_url, meta={'item': item})
+
+    def file_path(self, request, response=None, info=None, *, item=None):
+        item = request.meta['item']
+        image_guid = item['id']
+        return f'full/{image_guid}.jpg'  # Adjust this as needed
+    
+    def item_completed(self, results, item, info):
         return item

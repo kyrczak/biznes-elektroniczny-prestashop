@@ -7,6 +7,9 @@ import scrapy
 
 
 class DoniceScrapperItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
-    pass
+    id = scrapy.Field()
+    image_urls = scrapy.Field()
+    price = scrapy.Field()
+    name = scrapy.Field()
+    category = scrapy.Field()
+    manufacturer = scrapy.Field()
