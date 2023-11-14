@@ -24,6 +24,8 @@ Przechodzisz przez instalacje
 
 w bazach danych:
 
+ip bazy `presta-mariadb`
+
 nazwa bazy `prestashop`,
 
 user `root`,
