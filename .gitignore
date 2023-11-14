@@ -1,6 +1,5 @@
-/scrapper/venv
-/scrapper/
-/scrapper/
-/mariadb/
-/prestashop/
-/.vscode/
+venv/
+mariadb/
+prestashop/
+.vscode/
+**/venv
