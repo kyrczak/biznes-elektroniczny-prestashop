@@ -19,7 +19,7 @@ NEWSPIDER_MODULE = "donice_scrapper.spiders"
 ROBOTSTXT_OBEY = True
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-CONCURRENT_REQUESTS = 250
+CONCURRENT_REQUESTS = 64
 
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
@@ -52,7 +52,7 @@ CONCURRENT_REQUESTS = 250
 #DOWNLOADER_MIDDLEWARES = {
 #    "donice_scrapper.middlewares.DoniceScrapperDownloaderMiddleware": 543,
 #}
-MEDIA_ALLOW_REDIRECTS = True
+#MEDIA_ALLOW_REDIRECTS = True
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
 #EXTENSIONS = {
@@ -91,4 +91,4 @@ TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 FEED_EXPORT_ENCODING = "utf-8"
 
 
-FEED_EXPORT_FIELDS = ['id', 'price', 'name', 'category', 'manufacturer','image_urls']
+FEED_EXPORT_FIELDS = ['id', 'price', 'name','short_description', 'category', 'attributes', 'manufacturer','image_urls']

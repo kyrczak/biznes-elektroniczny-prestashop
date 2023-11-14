@@ -2,7 +2,7 @@
 /prestashop/
 /.vscode/
 */venv/
+/venv/
 **/*.conf
-**/*.json
 **/__pycache__/
 **/images/

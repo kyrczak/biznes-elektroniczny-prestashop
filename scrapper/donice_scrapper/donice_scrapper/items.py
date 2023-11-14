@@ -13,8 +13,5 @@ class DoniceScrapperItem(scrapy.Item):
     name = scrapy.Field()
     category = scrapy.Field()
     manufacturer = scrapy.Field()
+    attributes = scrapy.Field()
     short_description = scrapy.Field()
-
-class CategoryScrapperItem(scrapy.Item):
-    category = scrapy.Field()
-    subcategories = scrapy.Field()
