@@ -1,8 +1,5 @@
-/mariadb/
-/prestashop/
-/.vscode/
-*/venv/
-/venv/
-**/*.conf
-**/__pycache__/
-**/images/
+venv/
+mariadb/
+prestashop/
+.vscode/
+**/venv
