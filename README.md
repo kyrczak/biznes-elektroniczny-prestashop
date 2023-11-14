@@ -1,33 +1,13 @@
-# Docker
-Obrazy do pobrania ze strony dockera
+# API
 
-`prestashop 1.7.8.10-apache`
+## API KEY
+`H8SJBERLUHPSZQKPLNIDP45XCHUIC8IG`
 
-`mariadb:10`
+## API access
+`http://localhost:8080/api`
 
-## Compose
-Na linuxie trzeba pobrac pakiet docker-compose
+Username: `API KEY`
 
-```c++
-//Linux
-docker-compose up
+## Add new category
 
-//Windows
-docker compose up  
-```
-## Instalacja
-Po odpaleniu wchodzisz na `127.0.0.1:8080`
-
-Przechodzisz przez instalacje
-
-**BEZ SSL**
-
-w bazach danych:
-
-nazwa bazy `prestashop`,
-
-user `root`,
-
-haslo `admin`
-
-jak się zainstaluje zmienamy nazwę folderu admin na dowolną inną np admin1 i usuwamy folder `install`. Oba są w `prestashop/src/`.
+## Add new product
