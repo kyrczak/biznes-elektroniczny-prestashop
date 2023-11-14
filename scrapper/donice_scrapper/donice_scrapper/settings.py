@@ -91,4 +91,4 @@ TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 FEED_EXPORT_ENCODING = "utf-8"
 
 
-FEED_EXPORT_FIELDS = ['id', 'price', 'name', 'category', 'manufacturer']
+FEED_EXPORT_FIELDS = ['id', 'price', 'name', 'category', 'manufacturer','image_urls']
