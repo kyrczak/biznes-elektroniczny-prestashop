@@ -1,13 +1,5 @@
-# API
+# TODO
 
-## API KEY
-`H8SJBERLUHPSZQKPLNIDP45XCHUIC8IG`
+## Directories
 
-## API access
-`http://localhost:8080/api`
-
-Username: `API KEY`
-
-## Add new category
-
-## Add new product
+`shop` - webiste directory

@@ -1,8 +1,5 @@
-/scrapper/venv
-*/venv/
-/scrapper/
-/scrapper/
-/mariadb/
-/prestashop/
-/.vscode/
-/api/__pycache__/
+venv/
+mariadb/
+prestashop/
+.vscode/
+**/venv
