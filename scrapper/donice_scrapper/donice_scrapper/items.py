@@ -15,3 +15,4 @@ class DoniceScrapperItem(scrapy.Item):
     manufacturer = scrapy.Field()
     attributes = scrapy.Field()
     short_description = scrapy.Field()
+    full_description = scrapy.Field()

@@ -4,6 +4,7 @@ import scrapy
 from donice_scrapper.items import DoniceScrapperItem
 import random 
 import re
+
 class ProductSpider(scrapy.Spider):
     name = "doniczki"
     #start_urls_base = ["https://sklep-kwiecisty.pl/doniczki/"]
@@ -19,9 +20,11 @@ class ProductSpider(scrapy.Spider):
         }
     }
     def start_requests(self):
-        with open('../results/categories.json', 'r') as json_file:
+        #fix the problem with relative paths
+        with open('results/categories.json', 'r') as json_file:
             categories = json.load(json_file)
 
+        #usunąć slice
         for category in categories:
             for subcategory in categories[category]:
                 yield scrapy.Request(url=categories[category][subcategory], callback=self.parse)
@@ -39,11 +42,13 @@ class ProductSpider(scrapy.Spider):
         item['category'] = response.css('li.bred-3 span[itemprop="name"]::text').get()
         item['manufacturer'] = response.css("a.brand").xpath("@title").get()
         image_urls = response.css("div.innersmallgallery a").xpath("@href").extract()
-        item['short_description'] = retrieve_description(response)
+        
+        description = retrieve_description(response)
+        item['short_description'] = description[0]
         if item['short_description'] is None:
             #skip product without description
             return
-        #TODO: add full description
+        item['full_description'] = description[1]
         item['image_urls'] = ["https://sklep-kwiecisty.pl" + url for url in image_urls][:2]
         item['attributes'] = {}
         materials = response.xpath('//*[@id="option_7"]/option/text()').getall()
@@ -56,15 +61,49 @@ class ProductSpider(scrapy.Spider):
         item['attributes']['weight'] = get_weight(response)
         yield item
 
-   
-def retrieve_description(response):
-    description = response.xpath('//*[@id="box_description"]/div[2]/div/div/div[1]/text()[2]').get()
-    if description is None:
-        description = response.xpath('//*[@id="box_description"]/div[2]/div/p/text()').get()
-    if description is None:
-        description = response.xpath('//*[@id="box_description"]/div[2]/div/section/text()').get()
+def processLine(responseLine): #takes single line as an argument
     
-    return description
+    responseLine = responseLine.replace('\n', "")
+    responseLine = responseLine.replace('\t', "")
+    responseLine = responseLine.replace('\r', "")
+    responseLine = responseLine.strip()
+    responseLine = responseLine.replace("  ", " ")
+    tags = re.findall(r"<.+?>", responseLine)
+    endTags = re.findall(r"</.+?>", responseLine)
+    
+    for tag in endTags: #replace all </> tags
+        targetString = ""
+        tagContent = tag[2:-1]
+        match tagContent:
+            case _: pass
+        responseLine = responseLine.replace(tag, targetString)
+
+    for tag in tags: #replace all <> tags
+        tagContent = tag[1:-1]
+        targetString = ""
+        match tagContent:
+            case "p": 
+                targetString = "\n"
+            case "br":
+                targetString = "\n"
+            case "li":
+                targetString = "- "
+            case _: pass            
+        responseLine = responseLine.replace(tag, targetString)
+    return responseLine
+   
+
+def getDescription(desription_content): #takes list of html lines from item description as an argument
+    descriptionLinesList = [ processLine(line) for line in desription_content]
+    descriptionLinesList = [ x for x in descriptionLinesList if not x.isspace()] #removing empty lines
+    fullDesc = "".join(descriptionLinesList)
+    shortDesc = descriptionLinesList[0]
+    
+    return ( shortDesc, fullDesc )   
+
+def retrieve_description(response):
+    desription_content = response.xpath('//*[@id="box_description"]/div/div//*').getall()
+    return getDescription(desription_content) # tuple: (short_description, long_description)
             
 def get_weight(response):
      desc_list = response.xpath('//*[@id="box_description"]/div[2]/div//text()').getall()
