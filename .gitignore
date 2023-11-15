@@ -1,5 +1,5 @@
-venv/
-mariadb/
-prestashop/
-.vscode/
-**/venv
+**/mariadb/
+**/prestashop/
+/.vscode/
+**/venv/
+**/__pycache__/
