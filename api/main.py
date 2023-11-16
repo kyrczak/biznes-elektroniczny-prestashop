@@ -32,7 +32,7 @@ def remove_products():
     print(product_ids)
     # Iterate through the category IDs and delete each one
     for product_id in product_ids:
-        product_delete_url = API_DEFAULT_LINK + f'categories/{product_id}?ws_key={API_KEY}'
+        product_delete_url = API_DEFAULT_LINK + f'products/{product_id}?ws_key={API_KEY}'
         delete_response = requests.delete(product_delete_url)
         print(delete_response.status_code)
         if delete_response.status_code == 200 or delete_response.status_code == 404:
@@ -60,11 +60,20 @@ def add_product(product):
     product_schema["product"]["reference"] = product["id"]
     product_schema["product"]["id_category_default"] = get_category_id(product["category"])
     product_schema["product"]["name"]["language"]["value"] = product["name"]
+    product_schema["product"]["associations"]["categories"] = {
+            "category": [
+                {"id": 2},
+                {"id": get_category_id(product["category"])}
+            ],
+        }
     product_schema["product"]["price"] = convert_price_to_float(product["price"])
     print(product_schema["product"]["price"])
     product_schema["product"]["link_rewrite"]["language"]["value"] = product["name"].lower().replace(" ", "-")
     product_schema["product"]["meta_title"]["language"]["value"] = product["name"]
-    product_schema["product"]["weight"] = product["attributes"]["weight"]
+    if product["attributes"]["weight"] is None:
+        product_schema["product"]["weight"] = 0.5
+    else:
+        product_schema["product"]["weight"] = product["attributes"]["weight"]
     product_schema["product"]["description_short"]["language"]["value"] = product["short_description"]
     product_schema["product"]["description"]["language"]["value"] = f'{product["short_description"]}<br><strong>Masa:</strong> {product["attributes"]["weight"]}g<br><strong>Producent:</strong> {product["manufacturer"]}'
 
@@ -98,8 +107,6 @@ def process_categories(categories_data):
 def process_products(products_data):
     cnt = 0
     for product in products_data:
-        if cnt > 1:
-            break
         prod ={
             "id": product["id"],
             "price": product["price"],
@@ -123,14 +130,14 @@ if __name__ == "__main__":
     prestashop = prestapyt.PrestaShopWebServiceDict(
         API_DEFAULT_LINK, API_KEY)
 
-    with open('./api/categories.json', 'r') as json_file:
+    with open('categories.json', 'r') as json_file:
         categories_data = json.load(json_file)
 
-    with open('./api/products.json', 'r') as json_file:
+    with open('products.json', 'r') as json_file:
         products_data = json.load(json_file)
 
-    #remove_categories()
-    remove_products()
+    remove_categories()
+    #remove_products()
 
     category_schema = prestashop.get('categories', options={'schema': 'blank'})
     product_schema = prestashop.get('products', options={'schema': 'blank'})
@@ -138,8 +145,8 @@ if __name__ == "__main__":
     del product_schema["product"]["associations"]["combinations"]
 
 
-    #process_categories(categories_data)
-    #process_products(products_data)
+    process_categories(categories_data)
+    process_products(products_data)
 
     #linux command to zip prestashop and mariadb folders into prestashop.zip
     #zip -r prestashop.zip prestashop mariadb
