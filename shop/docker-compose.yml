@@ -13,11 +13,14 @@ services:
 
   prestashop:
     container_name: prestashop
-    image: prestashop/prestashop:1.7.8.10-apache
+    build:
+      context: .
+      dockerfile: Dockerfile
     restart: always
     depends_on:
       - mariadb
     ports:
+      - 443:443
       - 8080:80
     environment:
       DB_SERVER: presta-mariadb
