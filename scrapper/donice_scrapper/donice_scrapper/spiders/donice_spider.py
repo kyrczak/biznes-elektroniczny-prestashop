@@ -58,7 +58,10 @@ class ProductSpider(scrapy.Spider):
                 count = 3
             item['attributes']['material'] = random.sample(materials,count)
         item['attributes']['amount'] = random.randint(0,10)
-        item['attributes']['weight'] = get_weight(response)
+        wgt = get_weight(response)
+        if wgt is None:
+            wgt = round(random.uniform(0.01, 5),2) 
+        item['attributes']['weight'] = wgt
         yield item
 
 def processLine(responseLine): #takes single line as an argument
@@ -97,7 +100,7 @@ def getDescription(desription_content): #takes list of html lines from item desc
     descriptionLinesList = [ processLine(line) for line in desription_content]
     descriptionLinesList = [ x for x in descriptionLinesList if not x.isspace()] #removing empty lines
     fullDesc = "".join(descriptionLinesList)
-    shortDesc = descriptionLinesList[0]
+    shortDesc = descriptionLinesList[0].partition('.')[0] #get first sentence
     
     return ( shortDesc, fullDesc )   
 
@@ -113,7 +116,10 @@ def get_weight(response):
             weight_match = re.search(r'(\d[\d,\.]*)\s*kg', elem.lower())
             weight = weight_match.group(1)
             weight = float(weight.replace(',','.'))
+            print("WEIGHT:" +str(weight))
             return weight
+     return round(random.uniform(0.01, 5),2)
+
                 
     
 
