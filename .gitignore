@@ -3,3 +3,5 @@ shop/prestashop/
 /.vscode/
 **/venv/
 **/__pycache__/
+*.key
+*.crt
