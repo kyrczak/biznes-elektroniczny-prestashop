@@ -1,5 +1,6 @@
 **/mariadb/
 **/prestashop/
+**/db_dump/
 /.vscode/
 **/venv/
 **/__pycache__/

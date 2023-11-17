@@ -8,7 +8,7 @@ services:
       MYSQL_ROOT_PASSWORD: admin
       MYSQL_DATABASE: prestashop
     volumes:
-      - ./mariadb/db_dump:/docker-entrypoint-initdb.d
+      - ./db_dump:/docker-entrypoint-initdb.d
       - ./mariadb:/var/lib/mysql
 
   prestashop:

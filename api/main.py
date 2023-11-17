@@ -12,8 +12,11 @@ def remove_categories():
     root = fromstring(response.content)
 
     category_ids = [category.get('id') for category in root.findall('.//category')]
+    
     # Iterate through the category IDs and delete each one
     for category_id in category_ids:
+        if category_id == "1" or category_id == "2":
+            continue
         category_delete_url = API_DEFAULT_LINK + f'categories/{category_id}?ws_key={API_KEY}'
         delete_response = requests.delete(category_delete_url)
 
@@ -91,20 +94,34 @@ def add_product(product):
 
 
 
-def process_categories(categories_data):
+def process_categories():
+    try:
+        with open('./categories.json', 'r') as json_file:
+            categories_data = json.load(json_file)
+    except:
+        print("Problem z categories.json")
+        return
+
+    main_site_category_index = 2
     #print categories and their subcategories
-    id = 2
     for main_category, subcategories in categories_data.items():
         print(main_category)
-        parent_id = add_category(main_category, 1)
+        parent_id = add_category(main_category, 2)
         for subcategory in subcategories:
             print(subcategory)
             add_category(subcategory, parent_id)
-        id += 1
         
 
         
 def process_products(products_data):
+    
+    try:
+        with open('./products.json', 'r') as json_file:
+            products_data = json.load(json_file)
+    except:
+        print("Problem z products.json")
+        return
+        
     cnt = 0
     for product in products_data:
         prod ={
@@ -130,13 +147,7 @@ if __name__ == "__main__":
     prestashop = prestapyt.PrestaShopWebServiceDict(
         API_DEFAULT_LINK, API_KEY)
 
-    with open('./categories.json', 'r') as json_file:
-        categories_data = json.load(json_file)
-
-    with open('./products.json', 'r') as json_file:
-        products_data = json.load(json_file)
-
-    #remove_categories()
+    remove_categories()
     remove_products()
 
     category_schema = prestashop.get('categories', options={'schema': 'blank'})
@@ -145,8 +156,5 @@ if __name__ == "__main__":
     del product_schema["product"]["associations"]["combinations"]
 
 
-    #process_categories(categories_data)
-    process_products(products_data)
-
-    #linux command to zip prestashop and mariadb folders into prestashop.zip
-    #zip -r prestashop.zip prestashop mariadb
+    #process_categories()
+    #process_products()
