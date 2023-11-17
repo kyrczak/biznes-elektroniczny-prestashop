@@ -1,31 +1,34 @@
-newest_backup=$(find ./backups/ -type f -name "backup*.zip" | sort -n | tail -1)
+newest_backup=$(find ./backups/ -type f -name "backup*.tar.gz" | sort -n | tail -1)
 
 if [ -z "$newest_backup" ]; then
   echo "No backup file found."
   exit 1
 fi
 
+# untar the backup with access rights
+tar -xzf "$newest_backup" -C ./backups/
 
-unzip "$newest_backup" -d ./backups/
 
-
-db_dump_dir=$(find ./backups/ -type d -name "db_dump")
-mariadb_dir=$(find ./backups/ -type d -name "mariadb")
-prestashop_dir=$(find ./backups/ -type d -name "prestashop")
+db_dump_dir=$(find ./backups/shop -type d -name "db_dump")
+prestashop_dir=./backups/shop/prestashop
 
 
 if [ -d "$db_dump_dir" ]; then
-  cp -r "$db_dump_dir" ../shop/ && echo "Copied $db_dump_dir to ../shop/"
+  cp -r "$db_dump_dir" ../shop/ && echo "kopiuje $db_dump_dir do ../shop/"
   rm -rf "$db_dump_dir"
 fi
 
-if [ -d "$mariadb_dir" ]; then
-  cp -r "$mariadb_dir" ../shop/ && echo "Copied $mariadb_dir to ../shop/"
-  rm -rf "$mariadb_dir"
+if [ -d "$prestashop_dir" ]; then
+  cp -r "$prestashop_dir" ../shop/ && echo "kopiuje $prestashop_dir do ../shop/"
+  rm -rf "$prestashop_dir"
+  rm -rf ./backups/shop
+
+  sudo rm -r ../shop/mariadb/
+  echo "usuwam ../shop/mariadb/"
 fi
 
-if [ -d "$prestashop_dir" ]; then
-  cp -r "$prestashop_dir" ../shop/ && echo "Copied $prestashop_dir to ../shop/"
-  rm -rf "$prestashop_dir"
+# if mariadb doesnt exist
+if [ ! -d "../shop/mariadb" ]; then
+  echo "Backup przywrócony"
 fi
 
