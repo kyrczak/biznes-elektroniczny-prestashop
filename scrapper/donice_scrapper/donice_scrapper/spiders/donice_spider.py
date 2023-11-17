@@ -21,7 +21,7 @@ class ProductSpider(scrapy.Spider):
     }
     def start_requests(self):
         #fix the problem with relative paths
-        with open('results/categories.json', 'r') as json_file:
+        with open('../results/categories.json', 'r') as json_file:
             categories = json.load(json_file)
 
         #usunąć slice

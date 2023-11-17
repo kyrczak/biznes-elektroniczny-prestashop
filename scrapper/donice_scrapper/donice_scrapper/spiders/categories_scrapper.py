@@ -24,7 +24,7 @@ class CategoriesSpider(scrapy.Spider):
             result[category_name] = {subcategories[i]: response.urljoin(subcategory_links[i]) for i in range(len(subcategories))}
 
 
-        if not os.path.exists('scrapper/results'):
+        if not os.path.exists('../results'):
             os.makedirs('../results')
             
         with open('../results/categories.json', 'w') as json_file:

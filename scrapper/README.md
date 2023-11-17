@@ -1,9 +1,10 @@
 # Scrapper
 
-## Komendy:
-Generuje kategorie do `results/categories.json`
+### Instrukcja
+Wejść do `scrapper/donice_scrapper`
+`scrapy crawl categories`
 
-`scrapy runspider categories_spider.py`,
+otrzymujemy `categories.json`
 
  w postaci:
 
