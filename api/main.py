@@ -52,7 +52,7 @@ def get_category_id(category_name):
 
 def convert_price_to_float(price):
     tax = 1.23
-    return round(float(price.replace(",", ".").replace("zł", "").strip())/tax,2)
+    return round(float(price.replace(",", ".").replace("zł", "").replace(" ","").replace("\xa0","").strip())/tax,2)
 
 def add_product(product):
     
@@ -130,14 +130,14 @@ if __name__ == "__main__":
     prestashop = prestapyt.PrestaShopWebServiceDict(
         API_DEFAULT_LINK, API_KEY)
 
-    with open('categories.json', 'r') as json_file:
+    with open('./categories.json', 'r') as json_file:
         categories_data = json.load(json_file)
 
-    with open('products.json', 'r') as json_file:
+    with open('./products.json', 'r') as json_file:
         products_data = json.load(json_file)
 
-    remove_categories()
-    #remove_products()
+    #remove_categories()
+    remove_products()
 
     category_schema = prestashop.get('categories', options={'schema': 'blank'})
     product_schema = prestashop.get('products', options={'schema': 'blank'})
@@ -145,7 +145,7 @@ if __name__ == "__main__":
     del product_schema["product"]["associations"]["combinations"]
 
 
-    process_categories(categories_data)
+    #process_categories(categories_data)
     process_products(products_data)
 
     #linux command to zip prestashop and mariadb folders into prestashop.zip
