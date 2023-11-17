@@ -29,6 +29,8 @@ fi
 
 # if mariadb doesnt exist
 if [ ! -d "../shop/mariadb" ]; then
+  sudo chmod -R 777 ../shop/db_dump
+  sudo chmod -R 777 ../shop/prestashop
   echo "Backup przywrócony"
 fi
 
