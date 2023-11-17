@@ -22,8 +22,8 @@ class CategoriesSpider(scrapy.Spider):
             subcategory_links = category.css('div.submenu.level1 ul.level1 li p a::attr(href)').getall()
 
             result[category_name] = {subcategories[i]: response.urljoin(subcategory_links[i]) for i in range(len(subcategories))}
-
-
+        result["inne"] = { "inne" : "none" } 
+ 
         if not os.path.exists('../results'):
             os.makedirs('../results')
             

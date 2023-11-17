@@ -8,6 +8,7 @@ import re
 class ProductSpider(scrapy.Spider):
     name = "doniczki"
     #start_urls_base = ["https://sklep-kwiecisty.pl/doniczki/"]
+    categoriesArr = []
 
     custom_settings={
         'FEEDS': {
@@ -23,10 +24,11 @@ class ProductSpider(scrapy.Spider):
         #fix the problem with relative paths
         with open('../results/categories.json', 'r') as json_file:
             categories = json.load(json_file)
-
         #usunąć slice
         for category in categories:
+            self.categoriesArr.append(category)
             for subcategory in categories[category]:
+                self.categoriesArr.append(subcategory)
                 yield scrapy.Request(url=categories[category][subcategory], callback=self.parse)
     
     def parse(self, response):
@@ -39,8 +41,16 @@ class ProductSpider(scrapy.Spider):
         item['id'] = response.css('input[name="product_id"]').xpath("@value").get()
         item['price'] =response.css('em.main-price::text').get()
         item['name']= response.css("title::text").get().replace('Sklep Kwiecisty', "")
-        item['category'] = response.css('li.bred-3 span[itemprop="name"]::text').get()
-        item['manufacturer'] = response.css("a.brand").xpath("@title").get()
+        
+        category = response.css('li.bred-3 span[itemprop="name"]::text').get()
+        if category not in self.categoriesArr:
+            category = "inne"
+        item['category'] = category
+        
+        manufacturer = response.css("a.brand").xpath("@title").get()
+        if manufacturer is None:
+            manufacturer = "inne"
+        item['manufacturer'] = manufacturer
         image_urls = response.css("div.innersmallgallery a").xpath("@href").extract()
         
         description = retrieve_description(response)
@@ -49,6 +59,8 @@ class ProductSpider(scrapy.Spider):
             #skip product without description
             return
         item['full_description'] = description[1]
+        if item['full_description'] is None:
+            item['full_description'] = item['short_description']
         item['image_urls'] = ["https://sklep-kwiecisty.pl" + url for url in image_urls][:2]
         item['attributes'] = {}
         materials = response.xpath('//*[@id="option_7"]/option/text()').getall()
