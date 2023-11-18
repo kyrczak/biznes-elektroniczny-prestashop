@@ -4,12 +4,12 @@ import scrapy
 from donice_scrapper.items import DoniceScrapperItem
 import random 
 import re
-
+from time import *
 class ProductSpider(scrapy.Spider):
     name = "doniczki"
     #start_urls_base = ["https://sklep-kwiecisty.pl/doniczki/"]
     categoriesArr = []
-
+    pagination_urls = []
     custom_settings={
         'FEEDS': {
             '../results/products.json': {
@@ -29,12 +29,23 @@ class ProductSpider(scrapy.Spider):
             self.categoriesArr.append(category)
             for subcategory in categories[category]:
                 self.categoriesArr.append(subcategory)
-                yield scrapy.Request(url=categories[category][subcategory], callback=self.parse)
+                print(categories[category][subcategory])
+                yield scrapy.Request(url=categories[category][subcategory], callback=self.parse,meta={'subcategory': subcategory})
     
     def parse(self, response):
+        if response.url not in self.pagination_urls:
+            self.pagination_urls.append(response.url)
         product_links = response.css("a.prodimage.f-row").xpath("@href").extract()
+        category_pages = response.css("div.paginator a::attr(href)").extract()
+        # append each category_pages to self.pagination_urls
+        for url in category_pages:
+            if url not in self.pagination_urls:
+                print("pagination url: " + url)
+                self.pagination_urls.append(url)
+                yield scrapy.Request(url=response.urljoin(url), callback=self.parse,meta={'subcategory': response.meta.get('subcategory')})
+
         for product_link in product_links:
-            yield scrapy.Request(url=response.urljoin(product_link), callback=self.parse_product)
+            yield scrapy.Request(url=response.urljoin(product_link), callback=self.parse_product,meta={'subcategory': response.meta.get('subcategory')})
 
     def parse_product(self, response):
         item = DoniceScrapperItem()
@@ -42,10 +53,8 @@ class ProductSpider(scrapy.Spider):
         item['price'] =response.css('em.main-price::text').get()
         item['name']= response.css("title::text").get().replace('Sklep Kwiecisty', "")
         
-        category = response.css('li.bred-3 span[itemprop="name"]::text').get()
-        if category not in self.categoriesArr:
-            category = "inne"
-        item['category'] = category
+        #category = response.css('li.bred-3 span[itemprop="name"]::text').get()
+        item['category'] = response.meta.get('subcategory')
         
         manufacturer = response.css("a.brand").xpath("@title").get()
         if manufacturer is None:
@@ -128,7 +137,7 @@ def get_weight(response):
             weight_match = re.search(r'(\d[\d,\.]*)\s*kg', elem.lower())
             weight = weight_match.group(1)
             weight = float(weight.replace(',','.'))
-            print("WEIGHT:" +str(weight))
+           # print("WEIGHT:" +str(weight))
             return weight
      return round(random.uniform(0.01, 5),2)
 
