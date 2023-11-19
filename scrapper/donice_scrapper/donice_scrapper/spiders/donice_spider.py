@@ -61,6 +61,9 @@ class ProductSpider(scrapy.Spider):
             manufacturer = "inne"
         item['manufacturer'] = manufacturer
         image_urls = response.css("div.innersmallgallery a").xpath("@href").extract()
+        mainImg = response.css("div.mainimg img").xpath("@src").extract()[0]
+        image_urls.insert(0,mainImg)
+
         
         description = retrieve_description(response)
         item['short_description'] = description[0]
@@ -70,7 +73,7 @@ class ProductSpider(scrapy.Spider):
         item['full_description'] = description[1]
         if item['full_description'] is None:
             item['full_description'] = item['short_description']
-        item['image_urls'] = ["https://sklep-kwiecisty.pl" + url for url in image_urls][:2]
+        item['image_urls'] = ["https://sklep-kwiecisty.pl" + url for url in image_urls[:2]]
         item['attributes'] = {}
         materials = response.xpath('//*[@id="option_7"]/option/text()').getall()
         if materials is not None:
