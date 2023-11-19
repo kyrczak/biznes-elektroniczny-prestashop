@@ -78,9 +78,9 @@ def add_product(product):
     if product["attributes"]["weight"] is None:
         product_schema["product"]["weight"] = 0.5
     else:
-        product_schema["product"]["weight"] = product["attributes"]["weight"]
+        product_schema["product"]["weight"] = product["attributes"]["weight"] / 1000
     product_schema["product"]["description_short"]["language"]["value"] = product["short_description"]
-    product_schema["product"]["description"]["language"]["value"] = f'{product["short_description"]}<br><strong>Masa:</strong> {product["attributes"]["weight"]}g<br><strong>Producent:</strong> {product["manufacturer"]}'
+    product_schema["product"]["description"]["language"]["value"] = f'{product["full_description"]}'
 
     #OPTIONS
     product_schema["product"]["id_tax_rules_group"] = 1
@@ -97,14 +97,19 @@ def add_product(product):
     add_stock(website_product_id, product["attributes"]["amount"])
 
 def add_product_images(product_imgs_dir, product_id):
-    for image in os.listdir(f'{IMAGES_PATH}{product_imgs_dir}'):
-        fd = open(f'{IMAGES_PATH}{product_imgs_dir}/{image}', 'rb')
-        f = fd.read()
-        fd.close()
-        prestashop.add(f'images/products/{product_id}', files=[
-            ("image", image, f)
-        ])
-
+    try:
+        for image in os.listdir(f'{RESULTS_PATH}images/full/{product_imgs_dir}'):
+            fd = open(f'{RESULTS_PATH}images/full/{product_imgs_dir}/{image}', 'rb')
+            f = fd.read()
+            fd.close()
+            try:
+                prestashop.add(f'images/products/{product_id}', files=[
+                    ("image", image, f)
+                ])
+            except:
+                print("Problem z dodaniem zdjecia, rozszrzenie: ", image.split(".")[-1])
+    except:
+        print("Problem z dodaniem zdjecia, folder: ", product_imgs_dir)
 
 def add_stock(product_id, product_quantity):
     stock_schema_id = prestashop.search("stock_availables", options={
@@ -119,10 +124,11 @@ def add_stock(product_id, product_quantity):
 
 def process_categories():
     try:
-        with open('./categories.json', 'r') as json_file:
+        with open(f'{RESULTS_PATH}categories.json', 'r') as json_file:
             categories_data = json.load(json_file)
     except:
         print("Problem z categories.json")
+        print(f'{RESULTS_PATH}categories.json')
         return
 
     main_site_category_index = 2
@@ -139,7 +145,7 @@ def process_categories():
 def process_products():
     
     try:
-        with open('./products.json', 'r') as json_file:
+        with open(f'{RESULTS_PATH}products.json', 'r') as json_file:
             products_data = json.load(json_file)
     except:
         print("Problem z products.json")
@@ -155,6 +161,7 @@ def process_products():
             "category": product["category"],
             "attributes": product["attributes"],
             "manufacturer": product["manufacturer"],
+            "full_description": product["full_description"]
         }
         print("Adding product: ", prod["name"])
         cnt += 1
