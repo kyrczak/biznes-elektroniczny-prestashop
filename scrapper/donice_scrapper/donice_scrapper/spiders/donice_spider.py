@@ -89,7 +89,6 @@ class ProductSpider(scrapy.Spider):
         yield item
 
 def processLine(responseLine): #takes single line as an argument
-    
     responseLine = responseLine.replace('\n', "")
     responseLine = responseLine.replace('\t', "")
     responseLine = responseLine.replace('\r', "")
@@ -97,7 +96,7 @@ def processLine(responseLine): #takes single line as an argument
     responseLine = responseLine.replace("  ", " ")
     tags = re.findall(r"<.+?>", responseLine)
     endTags = re.findall(r"</.+?>", responseLine)
-    
+
     for tag in endTags: #replace all </> tags
         targetString = ""
         tagContent = tag[2:-1]
@@ -112,25 +111,26 @@ def processLine(responseLine): #takes single line as an argument
             case "p": 
                 targetString = "\n"
             case "br":
-                targetString = "\n"
+                targetString = "\n\n"
+            case "h1":
+                targetString = "\n\n"
             case "li":
-                targetString = "- "
+                targetString = "\n- "
             case _: pass            
         responseLine = responseLine.replace(tag, targetString)
-    return responseLine
+
+    return responseLine.strip()
    
 
 def getDescription(desription_content): #takes list of html lines from item description as an argument
-    descriptionLinesList = [ processLine(line) for line in desription_content]
-    descriptionLinesList = [ x for x in descriptionLinesList if not x.isspace()] #removing empty lines
-    fullDesc = "".join(descriptionLinesList)
-    shortDesc = descriptionLinesList[0].partition('.')[0] #get first sentence
-    
-    return ( shortDesc, fullDesc )   
+    description = processLine(desription_content)
+    shortDesc = description.replace('\n','.').partition('.')[0] #get first sentence
+    return ( shortDesc, description )   
 
 def retrieve_description(response):
-    desription_content = response.xpath('//*[@id="box_description"]/div/div//*').getall()
-    return getDescription(desription_content) # tuple: (short_description, long_description)
+    description_content = response.xpath('//*[@id="box_description"]/div/div//*').getall()
+    description_content = response.css("div.resetcss").get()
+    return getDescription(description_content) # tuple: (short_description, long_description)
             
 def get_weight(response):
      desc_list = response.xpath('//*[@id="box_description"]/div[2]/div//text()').getall()
