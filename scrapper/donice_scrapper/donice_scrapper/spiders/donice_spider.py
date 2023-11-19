@@ -73,7 +73,7 @@ class ProductSpider(scrapy.Spider):
         item['full_description'] = description[1]
         if item['full_description'] is None:
             item['full_description'] = item['short_description']
-        item['image_urls'] = ["https://sklep-kwiecisty.pl" + url for url in image_urls[:2]]
+        item['image_urls'] = ["https://sklep-kwiecisty.pl" + url for url in image_urls[:3:2]]
         item['attributes'] = {}
         materials = response.xpath('//*[@id="option_7"]/option/text()').getall()
         if materials is not None:
