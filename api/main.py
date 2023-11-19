@@ -2,6 +2,8 @@ from const import *
 import prestapyt
 import json
 from xml.etree.ElementTree import fromstring
+import os
+import io
 
 def remove_categories():
     import requests
@@ -90,9 +92,30 @@ def add_product(product):
     product_schema["product"]["id_shop_default"] = 1
 
 
-    prestashop.add("products", product_schema)["prestashop"]["product"]["id"]
+    website_product_id = prestashop.add("products", product_schema)["prestashop"]["product"]["id"]
+    add_product_images(product["id"], website_product_id)
+    add_stock(website_product_id, product["attributes"]["amount"])
+
+def add_product_images(product_imgs_dir, product_id):
+    for image in os.listdir(f'{IMAGES_PATH}{product_imgs_dir}'):
+        fd = open(f'{IMAGES_PATH}{product_imgs_dir}/{image}', 'rb')
+        f = fd.read()
+        fd.close()
+        prestashop.add(f'images/products/{product_id}', files=[
+            ("image", image, f)
+        ])
 
 
+def add_stock(product_id, product_quantity):
+    stock_schema_id = prestashop.search("stock_availables", options={
+        "filter[id_product]": product_id
+    })[0]
+    stock_schema = prestashop.get(
+        "stock_availables", resource_id=stock_schema_id)
+    
+    stock_schema["stock_available"]["quantity"] = product_quantity
+    stock_schema["stock_available"]["depends_on_stock"] = 0
+    prestashop.edit("stock_availables", stock_schema)
 
 def process_categories():
     try:
@@ -113,7 +136,7 @@ def process_categories():
         
 
         
-def process_products(products_data):
+def process_products():
     
     try:
         with open('./products.json', 'r') as json_file:
@@ -156,5 +179,5 @@ if __name__ == "__main__":
     del product_schema["product"]["associations"]["combinations"]
 
 
-    #process_categories()
-    #process_products()
+    process_categories()
+    process_products()
