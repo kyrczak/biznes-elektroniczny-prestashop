@@ -85,7 +85,7 @@ class ProductSpider(scrapy.Spider):
         wgt = get_weight(response)
         if wgt is None:
             wgt = round(random.uniform(0.01, 5),2) 
-        item['attributes']['weight'] = wgt
+        item['attributes']['weight'] = wgt * 1000
         yield item
 
 def processLine(responseLine): #takes single line as an argument
