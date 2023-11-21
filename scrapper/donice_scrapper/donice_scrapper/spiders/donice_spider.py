@@ -73,19 +73,23 @@ class ProductSpider(scrapy.Spider):
         item['full_description'] = description[1]
         if item['full_description'] is None:
             item['full_description'] = item['short_description']
-        item['image_urls'] = ["https://sklep-kwiecisty.pl" + url for url in image_urls[:3:2]]
+        item['image_urls'] = ["https://sklep-kwiecisty.pl" + url for url in image_urls]
         item['attributes'] = {}
         materials = response.xpath('//*[@id="option_7"]/option/text()').getall()
+
         if materials is not None:
-            count = len(materials)
-            if count > 3:
-                count = 3
-            item['attributes']['material'] = random.sample(materials,count)
+            materials = append_additional_materials(materials)
+            item['image_urls'],materials_found = find_materials_and_images(item['image_urls'],materials)
+            if materials_found is not None:
+                item['attributes']['material'] = materials_found
+            else:
+                item['attributes']['material'] = random.sample(materials,3)
+
         item['attributes']['amount'] = random.randint(0,10)
         wgt = get_weight(response)
         if wgt is None:
             wgt = round(random.uniform(0.01, 5),2) 
-        item['attributes']['weight'] = wgt * 1000
+        item['attributes']['weight'] = wgt
         yield item
 
 def processLine(responseLine): #takes single line as an argument
@@ -122,7 +126,7 @@ def processLine(responseLine): #takes single line as an argument
     return responseLine.strip()
    
 
-def getDescription(desription_content): #takes list of html lines from item description as an argument
+def get_description(desription_content): #takes list of html lines from item description as an argument
     description = processLine(desription_content)
     shortDesc = description.replace('\n','.').partition('.')[0] #get first sentence
     return ( shortDesc, description )   
@@ -130,7 +134,7 @@ def getDescription(desription_content): #takes list of html lines from item desc
 def retrieve_description(response):
     description_content = response.xpath('//*[@id="box_description"]/div/div//*').getall()
     description_content = response.css("div.resetcss").get()
-    return getDescription(description_content) # tuple: (short_description, long_description)
+    return get_description(description_content) # tuple: (short_description, long_description)
             
 def get_weight(response):
      desc_list = response.xpath('//*[@id="box_description"]/div[2]/div//text()').getall()
@@ -144,16 +148,61 @@ def get_weight(response):
             return weight
      return round(random.uniform(0.01, 5),2)
 
-                
+def find_materials_and_images(image_urls,materials):
+    materials_found = []
+    for url in image_urls:
+        for material in materials:
+            #change polish letters to english
+            material = material.replace("ą","a")
+            material = material.replace("ć","c")
+            material = material.replace("ę","e")
+            material = material.replace("ł","l")
+            material = material.replace("ń","n")
+            material = material.replace("ó","o")
+            material = material.replace("ś","s")
+            material = material.replace("ź","z")
+            material = material.replace("ż","z")
+            #add - between words
+            material = material.replace(" ", "-")
+            if material.lower() in url.lower():
+                if material not in materials_found:
+                    materials_found.append(material)
+
+#process image urls and remove those that do not contain materials
+    if len(materials_found) > 0:
+        # keep urls that have materials in their names
+        for url in image_urls:
+            for material in materials_found:
+                if material.lower() not in url.lower() and url in image_urls:
+                        image_urls.remove(url)
+                elif material.lower() in url.lower():
+                    if url.endswith("webp") and url in image_urls:
+                        image_urls.remove(url)
+                        materials_found.remove(material)
+
+    else:
+        IMAGES_AMT_TO_KEEP = 3
+        #remove all urls that end with webp
+        for url in image_urls:
+            if url.endswith("webp"):
+                image_urls.remove(url)
+        
+        if len(image_urls) > IMAGES_AMT_TO_KEEP:
+            image_urls = random.sample(image_urls,IMAGES_AMT_TO_KEEP)
+    
+    return image_urls, materials_found
+
+def append_additional_materials(materials):
+    # find materials that ends with "y" and add new material with "a" instaed of "y" at the end
+    for material in materials:
+        if material.endswith("y"):
+            materials.append(material[:-1] + "a")
+    
+    #delete s2 and s3 from materials
+    if "S2" in materials:
+        materials.remove("S2")
+    if "S3" in materials:
+        materials.remove("S3")
     
 
-    #//*[@id="box_description"]/div[2]/div/section[1]
-    
-    
-
-
-# doniczki = response.css("div.products.products_extended.viewphot.s-row")[0]
-# zdjecie = doniczki.css("span.f-grid-12.img-wrap.replace-img-list img").xpath("@data-src").get()
-#ID = doniczki.css("div").xpath("@data-product-id").getall()
-#Opis produktu: doniczki.css("span.productname::text").get()
-#Cena: doniczki.css("div.price.f-row em::text").get()
+    return materials

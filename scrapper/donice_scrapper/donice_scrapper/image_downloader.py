@@ -12,8 +12,8 @@ def download_image(product_id, image_url, download_path, timestamp, image_index)
         directory_path = os.path.join(download_path, str(product_id))
         os.makedirs(directory_path, exist_ok=True)
 
-        # Save the image to the specified directory
-        image_path = os.path.join(directory_path, f'{product_id}_{timestamp}_{image_index}.jpg')
+        #save the image to directory_path + the part after / in the url
+        image_path = os.path.join(directory_path, f'{image_url}')
         with open(image_path, 'wb') as file:
             for chunk in response.iter_content(chunk_size=128):
                 file.write(chunk)

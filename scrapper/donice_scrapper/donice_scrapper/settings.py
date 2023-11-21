@@ -61,7 +61,7 @@ CONCURRENT_REQUESTS = 64
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-IMAGES_STORE = 'images'  # folder name or path where to save images
+IMAGES_STORE = '../results/images/'  # folder name or path where to save images
 #DOWNLOAD_DELAY = 1  # delay in downloading images
 ITEM_PIPELINES = {'donice_scrapper.pipelines.DoniceScrapperPipeline': 300}
 # Enable and configure the AutoThrottle extension (disabled by default)
