@@ -12,7 +12,7 @@ class ProductSpider(scrapy.Spider):
     pagination_urls = []
     custom_settings={
         'FEEDS': {
-            '../results/products.json': {
+            '../../results/products.json': {
                 'format': 'json',
                 'encoding': 'utf8',
                 'indent': 4,
@@ -22,7 +22,7 @@ class ProductSpider(scrapy.Spider):
     }
     def start_requests(self):
         #fix the problem with relative paths
-        with open('../results/categories.json', 'r') as json_file:
+        with open('../../results/categories.json', 'r') as json_file:
             categories = json.load(json_file)
         #usunąć slice
         for category in categories:
@@ -85,11 +85,20 @@ class ProductSpider(scrapy.Spider):
             else:
                 item['attributes']['material'] = random.sample(materials,3)
 
+
+        
         item['attributes']['amount'] = random.randint(0,10)
         wgt = get_weight(response)
         if wgt is None:
             wgt = round(random.uniform(0.01, 5),2) 
         item['attributes']['weight'] = wgt
+
+        technical_data = extract_technical_data(item['full_description'])
+        if technical_data is not None:
+            item['attributes'].update(technical_data)
+
+        
+
         yield item
 
 def processLine(responseLine): #takes single line as an argument
@@ -206,3 +215,14 @@ def append_additional_materials(materials):
     
 
     return materials
+
+def extract_technical_data(description):
+    # Use regular expression to find the block of "Dane techniczne"
+    cm_pairs = re.findall(r'-\s*([^\n:]+)\s*:\s*([\d\s]+x?[\d\s]+cm\.?)', description)
+    # Create a dictionary from the key-value pairs
+    cm_pairs_dict = {key.strip(): value.strip() for key, value in cm_pairs}
+    for pair in cm_pairs:
+        key, value = pair[:2]  # Take only the first two elements in case there are more
+        cm_pairs_dict[key.strip()] = value.strip()
+    return cm_pairs_dict
+    
