@@ -65,15 +65,20 @@ class ProductSpider(scrapy.Spider):
         image_urls.insert(0,mainImg)
 
         
+        #----------------------DESCRIPTION----------------------
         description = retrieve_description(response)
         item['short_description'] = description[0]
         if item['short_description'] is None:
-            #skip product without description
             return
-        item['full_description'] = description[1]
+  
+        item['full_description'] = prepare_full_description(description)
+
         if item['full_description'] is None:
             item['full_description'] = item['short_description']
+        #-------------------------------------------------------
+        #----------------------IMAGES---------------------------
         item['image_urls'] = ["https://sklep-kwiecisty.pl" + url for url in image_urls]
+        #----------------------ATTRIBUTES-----------------------
         item['attributes'] = {}
         materials = response.xpath('//*[@id="option_7"]/option/text()').getall()
 
@@ -84,8 +89,6 @@ class ProductSpider(scrapy.Spider):
                 item['attributes']['material'] = materials_found
             else:
                 item['attributes']['material'] = random.sample(materials,3)
-
-
         
         item['attributes']['amount'] = random.randint(0,10)
         wgt = get_weight(response)
@@ -93,10 +96,10 @@ class ProductSpider(scrapy.Spider):
             wgt = round(random.uniform(0.01, 5),2) 
         item['attributes']['weight'] = wgt
 
-        technical_data = extract_technical_data(item['full_description'])
+        technical_data = extract_technical_data(description[1])
         if technical_data is not None:
             item['attributes'].update(technical_data)
-
+        #-------------------------------------------------------
         
 
         yield item
@@ -225,4 +228,21 @@ def extract_technical_data(description):
         key, value = pair[:2]  # Take only the first two elements in case there are more
         cm_pairs_dict[key.strip()] = value.strip()
     return cm_pairs_dict
+
+def prepare_full_description(description):
+    # get first three sentences from description
+    full_description = description[1].split(".")
+    # if there are less than 3 sentences, get all of them
+    if len(full_description) < 2:
+        try:
+            full_description = full_description[0] + "." + full_description[1] + "."
+        except:
+            full_description = full_description[0]
+    else:
+        try: 
+            full_description = full_description[0] + "." + full_description[1] + "." + full_description[2] + "."
+        except:
+            full_description = full_description[0] + "." + full_description[1] + "."
+    
+    return full_description
     
