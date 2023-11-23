@@ -6,6 +6,11 @@ import os
 import re
 import io
 import requests
+from threading import Semaphore
+from concurrent.futures import ThreadPoolExecutor
+
+sem = Semaphore(1)
+
 def remove_categories():
     
 
@@ -92,16 +97,16 @@ def add_product(product):
     product_schema["product"]["show_price"] = 1
     product_schema["product"]["id_shop_default"] = 1
 
-    
+    sem.acquire()
     features = add_features(product["attributes"])
     
    
     if features is not None:
-        product_schema["product"]["associations"]["product_features"]["product_feature"] = product_features
-
-        website_product_id = prestashop.add("products", product_schema)["prestashop"]["product"]["id"]
-        add_product_images(product["id"], website_product_id)
-        add_stock(website_product_id, product["attributes"]["amount"])
+        product_schema["product"]["associations"]["product_features"]["product_feature"] = features
+    sem.release()
+    website_product_id = prestashop.add("products", product_schema)["prestashop"]["product"]["id"]
+    add_product_images(product["id"], website_product_id)
+    add_stock(website_product_id, product["attributes"]["amount"])
 
 
 def add_product_images(product_imgs_dir, product_id):
@@ -159,9 +164,11 @@ def process_products():
         print("Problem z products.json")
         return
         
-    cnt = 0
-    for product in products_data:
-        prod ={
+    with ThreadPoolExecutor(max_workers=15) as executor:
+        executor.map(process_product, products_data)
+        
+def process_product(product):
+    prod ={
             "id": product["id"],
             "price": product["price"],
             "name": product["name"],
@@ -171,9 +178,8 @@ def process_products():
             "manufacturer": product["manufacturer"],
             "full_description": product["full_description"]
         }
-        print("Adding product: ", prod["name"])
-        cnt += 1
-        add_product(prod)
+    print("Adding product: ", prod["name"])
+    add_product(prod)
 
 def add_features(product_attributes):
     feature_schema = prestashop.get("product_features", options={
@@ -183,7 +189,7 @@ def add_features(product_attributes):
         "schema": "blank"
         })
 
-    features_ids = []
+    features_ids = dict()
     for feature_name, feature_value in product_attributes.items():
         print (feature_name, feature_value)
         if  feature_name == "amount" or feature_name == "material" or feature_name == "price" or feature_name == "weight":
