@@ -3,5 +3,6 @@
 /.vscode/
 **/venv/
 **/__pycache__/
-/scripts/backups/
 **/db_dump/
+**/images/
+**/backups/
