@@ -3,10 +3,11 @@ import prestapyt
 import json
 from xml.etree.ElementTree import fromstring
 import os
+import re
 import io
-
+import requests
 def remove_categories():
-    import requests
+    
 
     # Get the list of categories
     categories_url = API_DEFAULT_LINK + 'categories' + f'?ws_key={API_KEY}'
@@ -26,7 +27,7 @@ def remove_categories():
             print(f"Category {category_id} deleted successfully.")
 
 def remove_products():
-    import requests
+    
 
     # Get the list of categories
     products_url = API_DEFAULT_LINK + 'products' + f'?ws_key={API_KEY}'
@@ -78,7 +79,7 @@ def add_product(product):
     if product["attributes"]["weight"] is None:
         product_schema["product"]["weight"] = 0.5
     else:
-        product_schema["product"]["weight"] = product["attributes"]["weight"] / 1000
+        product_schema["product"]["weight"] = product["attributes"]["weight"]
     product_schema["product"]["description_short"]["language"]["value"] = product["short_description"]
     product_schema["product"]["description"]["language"]["value"] = f'{product["full_description"]}'
 
@@ -91,15 +92,22 @@ def add_product(product):
     product_schema["product"]["show_price"] = 1
     product_schema["product"]["id_shop_default"] = 1
 
+    
+    features = add_features(product["attributes"])
+    
+   
+    if features is not None:
+        product_schema["product"]["associations"]["product_features"]["product_feature"] = product_features
 
-    website_product_id = prestashop.add("products", product_schema)["prestashop"]["product"]["id"]
-    add_product_images(product["id"], website_product_id)
-    add_stock(website_product_id, product["attributes"]["amount"])
+        website_product_id = prestashop.add("products", product_schema)["prestashop"]["product"]["id"]
+        add_product_images(product["id"], website_product_id)
+        add_stock(website_product_id, product["attributes"]["amount"])
+
 
 def add_product_images(product_imgs_dir, product_id):
     try:
-        for image in os.listdir(f'{RESULTS_PATH}images/full/{product_imgs_dir}'):
-            fd = open(f'{RESULTS_PATH}images/full/{product_imgs_dir}/{image}', 'rb')
+        for image in os.listdir(f'{RESULTS_PATH}images/{product_imgs_dir}'):
+            fd = open(f'{RESULTS_PATH}images/{product_imgs_dir}/{image}', 'rb')
             f = fd.read()
             fd.close()
             try:
@@ -167,9 +175,75 @@ def process_products():
         cnt += 1
         add_product(prod)
 
+def add_features(product_attributes):
+    feature_schema = prestashop.get("product_features", options={
+            "schema": "blank"
+        })
+    feature_option_schema = prestashop.get("product_feature_values", options={
+        "schema": "blank"
+        })
+
+    features_ids = []
+    for feature_name, feature_value in product_attributes.items():
+        print (feature_name, feature_value)
+        if  feature_name == "amount" or feature_name == "material" or feature_name == "price" or feature_name == "weight":
+            continue
+        feature = prestashop.get("product_features", options={"filter[name]": feature_name})
 
 
+        if feature["product_features"]:
+            feature_id = feature["product_features"]["product_feature"]["attrs"]["id"]
+        else:
+            feature_schema["product_feature"]["name"]["language"]["value"] = feature_name
+            feature_schema["product_feature"]["position"] = 1
+            feature_id = prestashop.add("product_features", feature_schema)["prestashop"]["product_feature"]["id"]
 
+        feature_option_schema["product_feature_value"]["id_feature"] = feature_id
+        feature_option_schema["product_feature_value"]["value"]["language"]["value"] = feature_value
+        feature_option_schema["product_feature_value"]["custom"] = 1
+        value_id = prestashop.add("product_feature_values", feature_option_schema)["prestashop"]["product_feature_value"]["id"]
+        features_ids[feature_id] = value_id
+
+
+    features = []
+    for feature_id, feature_value_id in features_ids.items():
+                features.append({
+                "id": feature_id,
+                "id_feature_value": feature_value_id
+            })   
+
+
+    return features
+
+def remove_features():
+    # Get the list of categories
+    products_url = API_DEFAULT_LINK + 'product_features' + f'?ws_key={API_KEY}'
+    response = requests.get(products_url)
+    root = fromstring(response.content)
+    product_ids = [product.get('id') for product in root.findall('.//product_feature')]
+    print(product_ids)
+    # Iterate through the category IDs and delete each one
+    for product_id in product_ids:
+        product_delete_url = API_DEFAULT_LINK + f'product_features/{product_id}?ws_key={API_KEY}'
+        delete_response = requests.delete(product_delete_url)
+        print(delete_response.status_code)
+        if delete_response.status_code == 200 or delete_response.status_code == 404:
+            print(f"product feature {product_id} deleted successfully.")
+    
+    products_url = API_DEFAULT_LINK + 'product_feature_values' + f'?ws_key={API_KEY}'
+    response = requests.get(products_url)
+    root = fromstring(response.content)
+    product_ids = [product.get('id') for product in root.findall('.//product_feature_value')]
+    print(product_ids)
+    # Iterate through the category IDs and delete each one
+    for product_id in product_ids:
+        product_delete_url = API_DEFAULT_LINK + f'product_feature_values/{product_id}?ws_key={API_KEY}'
+        delete_response = requests.delete(product_delete_url)
+        print(delete_response.status_code)
+        if delete_response.status_code == 200 or delete_response.status_code == 404:
+            print(f"product_feature_value {product_id} deleted successfully.")
+
+        
 
 
 if __name__ == "__main__":
@@ -179,6 +253,7 @@ if __name__ == "__main__":
 
     remove_categories()
     remove_products()
+    remove_features()
 
     category_schema = prestashop.get('categories', options={'schema': 'blank'})
     product_schema = prestashop.get('products', options={'schema': 'blank'})
