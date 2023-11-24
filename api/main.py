@@ -192,8 +192,10 @@ def add_features(product_attributes):
     features_ids = dict()
     for feature_name, feature_value in product_attributes.items():
         print (feature_name, feature_value)
-        if  feature_name == "amount" or feature_name == "material" or feature_name == "price" or feature_name == "weight":
+        if  feature_name == "amount" or feature_name == "material" or feature_name == "price":
             continue
+        if feature_name == "weight":
+            feature_name = "Waga"
         feature = prestashop.get("product_features", options={"filter[name]": feature_name})
 
 
@@ -205,7 +207,10 @@ def add_features(product_attributes):
             feature_id = prestashop.add("product_features", feature_schema)["prestashop"]["product_feature"]["id"]
 
         feature_option_schema["product_feature_value"]["id_feature"] = feature_id
-        feature_option_schema["product_feature_value"]["value"]["language"]["value"] = feature_value
+        if feature_name == "Waga":
+            feature_option_schema["product_feature_value"]["value"]["language"]["value"] = f'{feature_value} kg'
+        else:
+            feature_option_schema["product_feature_value"]["value"]["language"]["value"] = feature_value
         feature_option_schema["product_feature_value"]["custom"] = 1
         value_id = prestashop.add("product_feature_values", feature_option_schema)["prestashop"]["product_feature_value"]["id"]
         features_ids[feature_id] = value_id
@@ -257,9 +262,9 @@ if __name__ == "__main__":
     prestashop = prestapyt.PrestaShopWebServiceDict(
         API_DEFAULT_LINK, API_KEY)
 
-    remove_categories()
-    remove_products()
-    remove_features()
+    #remove_categories()
+   # remove_products()
+   # remove_features()
 
     category_schema = prestashop.get('categories', options={'schema': 'blank'})
     product_schema = prestashop.get('products', options={'schema': 'blank'})
@@ -267,5 +272,5 @@ if __name__ == "__main__":
     del product_schema["product"]["associations"]["combinations"]
 
 
-    process_categories()
+    #process_categories()
     process_products()
