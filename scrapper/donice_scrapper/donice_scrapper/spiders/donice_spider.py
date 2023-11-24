@@ -71,7 +71,7 @@ class ProductSpider(scrapy.Spider):
         if item['short_description'] is None:
             return
   
-        item['full_description'] = prepare_full_description(description)
+        item['full_description'] = prepare_full_description(description).replace("\n", "<br>")
 
         if item['full_description'] is None:
             item['full_description'] = item['short_description']
@@ -91,9 +91,7 @@ class ProductSpider(scrapy.Spider):
                 item['attributes']['material'] = random.sample(materials,3)
         
         item['attributes']['amount'] = random.randint(0,10)
-        wgt = get_weight(response)
-        if wgt is None:
-            wgt = round(random.uniform(0.01, 5),2) 
+        wgt = get_weight(response, item['name'])
         item['attributes']['weight'] = wgt
 
         technical_data = extract_technical_data(description[1])
@@ -148,7 +146,7 @@ def retrieve_description(response):
     description_content = response.css("div.resetcss").get()
     return get_description(description_content) # tuple: (short_description, long_description)
             
-def get_weight(response):
+def get_weight(response, product_name):
      desc_list = response.xpath('//*[@id="box_description"]/div[2]/div//text()').getall()
 
      for elem in desc_list:
@@ -158,6 +156,14 @@ def get_weight(response):
             weight = float(weight.replace(',','.'))
            # print("WEIGHT:" +str(weight))
             return weight
+    
+    #check if product name contains weight
+     if "kg" in product_name.lower():
+        weight_match = re.search(r'(\d[\d,\.]*)\s*kg', product_name.lower())   
+        weight = weight_match.group(1)
+        weight = float(weight.replace(',','.'))  
+        return weight
+     
      return round(random.uniform(0.01, 5),2)
 
 def find_materials_and_images(image_urls,materials):
@@ -181,6 +187,8 @@ def find_materials_and_images(image_urls,materials):
                     materials_found.append(material)
 
 #process image urls and remove those that do not contain materials
+    if len(image_urls) < 2:
+        return image_urls, materials_found
     if len(materials_found) > 0:
         # keep urls that have materials in their names
         for url in image_urls:
@@ -220,14 +228,19 @@ def append_additional_materials(materials):
     return materials
 
 def extract_technical_data(description):
-    # Use regular expression to find the block of "Dane techniczne"
-    cm_pairs = re.findall(r'-\s*([^\n:]+)\s*:\s*([\d\s]+x?[\d\s]+cm\.?)', description)
-    # Create a dictionary from the key-value pairs
-    cm_pairs_dict = {key.strip(): value.strip() for key, value in cm_pairs}
+    cm_pairs = re.findall(r'(?:(?<=-)|(?<=^))\s*([^\n:]+)\s*:\s*([\d,]+\s*(?:x\s*[\d,]+)?\s*cm\.?)\s*(?:\.\n|\n|$)', description)
+    liter_pairs = re.findall(r'(?:(?<=-)|(?<=^))\s*([^\n:]+)\s*:\s*([\d,]+\s*(?:l|litr|litry|litrów))\s*(?:\.\n|\n|$)', description)
+
+    # Combine the results from both patterns
+    data_dict = {}
     for pair in cm_pairs:
-        key, value = pair[:2]  # Take only the first two elements in case there are more
-        cm_pairs_dict[key.strip()] = value.strip()
-    return cm_pairs_dict
+        key, value = pair[:2]
+        data_dict[key.strip()] = value.strip()
+    for pair in liter_pairs:
+        key, value = pair[:2]
+        data_dict[key.strip()] = value.strip()
+
+    return data_dict
 
 def prepare_full_description(description):
     # get first three sentences from description
@@ -240,9 +253,12 @@ def prepare_full_description(description):
             full_description = full_description[0]
     else:
         try: 
-            full_description = full_description[0] + "." + full_description[1] + "." + full_description[2] + "."
+            full_description = full_description[0] + "." + full_description[1] + "." + full_description[2] + "." + full_description[3] + "."
         except:
-            full_description = full_description[0] + "." + full_description[1] + "."
+            try:
+                full_description = full_description[0] + "." + full_description[1] + "." + full_description[2] + "."
+            except:
+                full_description = full_description[0] + "." + full_description[1] + "."
     
     return full_description
     
