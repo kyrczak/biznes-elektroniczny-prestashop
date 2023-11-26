@@ -48,9 +48,11 @@ openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout prestashop.key -out 
 docker-compose up -d
 ```
 
-4. W przeglądarce sieciowej wchodzimy na adres https://localhost:8081
+4. W przeglądarce sieciowej wchodzimy na adres https://localhost
 
-5. Aby zatrzymać działanie kontenerów:
+5. Przy pierwszym uruchomieniu będziemy musieli zaakceptować certyfikat
+
+6. Aby zatrzymać działanie kontenerów:
 ```c++
 docker-compose down
 ```

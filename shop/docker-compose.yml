@@ -8,27 +8,24 @@ services:
       MYSQL_ROOT_PASSWORD: admin
       MYSQL_DATABASE: prestashop
     volumes:
-      - ./mariadb/db_dump:/docker-entrypoint-initdb.d
+      - ./db_dump:/docker-entrypoint-initdb.d
       - ./mariadb:/var/lib/mysql
 
   prestashop:
     container_name: prestashop
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: prestashop/prestashop:1.7.8.10-apache
     restart: always
     depends_on:
       - mariadb
     ports:
       - 443:443
-      - 8080:80
+      - 8080:443
     environment:
       DB_SERVER: presta-mariadb
       DB_NAME: prestashop
       DB_USER: root
       DB_PASSWD: admin
       PS_INSTALL_AUTO: 0
-      PS_DOMAIN: localhost:8080
       PS_FOLDER_ADMIN: admin
       PS_FOLDER_INSTALL: install  
       PS_LANGUAGE: pl
@@ -36,3 +33,15 @@ services:
       PS_DEV_MODE: 1
     volumes:
       - ./prestashop/src:/var/www/html
+      - ./prestashop.crt:/etc/ssl/certs/prestashop.crt
+      - ./prestashop.key:/etc/ssl/private/prestashop.key
+      - ./prestashop_ssl.conf:/etc/apache2/sites-available/prestashop_ssl.conf
+    command: 
+      - /bin/bash
+      - -c
+      - |
+        cp /etc/ssl/certs/prestashop.crt /usr/local/share/ca-certificates/prestashop.crt
+        update-ca-certificates
+        a2ensite prestashop_ssl
+        a2enmod ssl
+        apache2-foreground
