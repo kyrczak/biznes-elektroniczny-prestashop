@@ -128,14 +128,42 @@ def search_and_add():
     add_product()
 
 
-##enter cart
+def edit_cart():
+    ##enter cart
+    driver.get("http://localhost:8080")
+    cart = driver.find_element(by=By.ID, value="_desktop_cart")
+    if cart.is_enabled:
+        cart_url = cart.find_element(by=By.XPATH, value=".//a").get_attribute('href')
+        print(cart_url)
+        driver.get(cart_url)
+        print(cart_url)
+
+        ##in cart
+        for i in range(3):
+            delete_btns = driver.find_elements(by=By.XPATH, value="//a[@class='remove-from-cart']")
+            print("BTNS COUNT = " + str(len(delete_btns)))
+            btn_to_click = random.choice(delete_btns)
+            btn_to_click.click()
+            #driver.get(cart_url)
+
+
+#register
 driver.get("http://localhost:8080")
-cart = driver.find_element(by=By.ID, value="_desktop_cart")
-if cart.is_enabled:
-    cart_url = cart.find_element(by=By.XPATH, value="//a").get_attribute("href")
-    print(cart_url)
-    driver.get(cart_url)
+account_url = driver.find_element(by=By.XPATH, value="//div[@class='user-info']").find_element(by=By.XPATH, value=".//a").get_attribute('href')
+print(account_url)
+driver.get(account_url)
+#on account page
+driver.find_element(by=By.XPATH, value="//div[@class='no-account']")
+
+
+
+
+#add_products()
+#edit_cart()
 
 input("...")
+
+
+
 
 driver.quit()
