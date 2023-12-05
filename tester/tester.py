@@ -2,7 +2,9 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
+from unidecode import unidecode
 import time
+import calendar
 import random
 
 
@@ -146,14 +148,57 @@ def edit_cart():
             btn_to_click.click()
             #driver.get(cart_url)
 
-
+def register():
 #register
-driver.get("http://localhost:8080")
-account_url = driver.find_element(by=By.XPATH, value="//div[@class='user-info']").find_element(by=By.XPATH, value=".//a").get_attribute('href')
-print(account_url)
-driver.get(account_url)
-#on account page
-driver.find_element(by=By.XPATH, value="//div[@class='no-account']")
+    driver.get("http://localhost:8080")
+    account_url = driver.find_element(by=By.XPATH, value="//div[@class='user-info']").find_element(by=By.XPATH, value=".//a").get_attribute('href')
+    print(account_url)
+    driver.get(account_url)
+    #on account page
+    login_url = driver.find_element(by=By.XPATH, value="//div[@class='no-account']").find_element(by=By.XPATH, value = './/a').get_attribute('href')
+    driver.get(login_url)
+    driver.implicitly_wait(2)
+    ##on registration page
+    with open('imiona.csv') as names:
+        with open('nazwiska.csv') as surnames:
+            name = random.choice(names.readlines()[:500]).split(',')[0].lower().capitalize()
+            surname = random.choice(surnames.readlines()[:500]).split(',')[0].lower().capitalize()
+            print(name, surname)
+            mail = name + '.' + surname + '@student.debil.pl'
+            mail = unidecode(mail)
+            year = random.randrange(1930, 2023)
+            month = random.randrange(1,13)
+            day = calendar.monthrange(year, month)[1]
+            birth = str(year) + '-' + str(month) + '-' + str(day) 
+            password = name + surname + str(year)
+
+            input_name = driver.find_element(by=By.ID, value='field-firstname')
+            input_name.click()
+            input_name.send_keys(name)
+            input_surname = driver.find_element(by=By.ID, value='field-lastname')
+            input_surname.click()
+            input_surname.send_keys(surname)
+            input_email = driver.find_element(by=By.ID, value='field-email')
+            input_email.click()
+            input_email.send_keys(mail)
+            input_gender = driver.find_element(by=By.ID, value='field-id_gender-1')
+            input_gender.click()
+            input_birth = driver.find_element(by=By.ID, value='field-birthday')
+            input_birth.click()
+            input_birth.send_keys(birth)
+            input_password = driver.find_element(by=By.ID, value='field-password')
+            input_password.click()
+            input_password.send_keys(password)
+            terms_checkbox = driver.find_element(by=By.XPATH, value="//input[@name='customer_privacy']")
+            terms_checkbox.click()
+            rodo_checkbox = driver.find_element(by=By.XPATH, value="//input[@name='psgdpr']")
+            rodo_checkbox.click()
+
+            ##submit
+            driver.find_element(by=By.XPATH, value="//button[contains(@class, 'form-control-submit')]").click()
+            ##on main page
+
+
 
 
 
