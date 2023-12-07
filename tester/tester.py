@@ -9,10 +9,13 @@ import time
 import calendar
 import random
 
+options = webdriver.ChromeOptions()
+options.add_argument('ignore-certificate-errors')
 
-driver = webdriver.Chrome()
+driver = webdriver.Chrome(options=options)
 
-driver.get("http://localhost:8080")
+driver.get("https://localhost:8080")
+input('...')
 
 def back():
     driver.navigate().back()
@@ -110,7 +113,7 @@ def add_product():
         categoryOptions[-2].click() ## go back
         return
     quantity_input = driver.find_element(by=By.ID, value="quantity_wanted")
-    quantity = random.randrange(1,10)
+    quantity = random.randrange(1,2)
     quantity_input.click()
     quantity_input.send_keys(Keys.BACKSPACE) 
     quantity_input.send_keys(str(quantity)) ##enter number of products
@@ -207,7 +210,7 @@ def add_products(full = False):
 def search_and_add():
     ##search for products
     searchTerm = "konewka"
-    driver.get("http://localhost:8080")
+    driver.get("https://localhost:8080")
     search_bar = driver.find_element(by=By.XPATH, value="//input[@class='ui-autocomplete-input']")
     search_bar.click()
     search_bar.send_keys(searchTerm)
@@ -217,7 +220,7 @@ def search_and_add():
 
 def edit_cart():
     ##enter cart
-    driver.get("http://localhost:8080")
+    driver.get("https://localhost:8080")
     cart = driver.find_element(by=By.ID, value="_desktop_cart")
     if cart.is_enabled:
         cart_url = cart.find_element(by=By.XPATH, value=".//a").get_attribute('href')
@@ -233,7 +236,7 @@ def edit_cart():
 
 def register():
 #register
-    #driver.get("http://localhost:8080")
+    #driver.get("https://localhost:8080")
     #account_url = driver.find_element(by=By.XPATH, value="//div[@class='user-info']").find_element(by=By.XPATH, value=".//a").get_attribute('href')
     #print(account_url)
     #driver.get(account_url)
@@ -301,11 +304,9 @@ def enter_address():
 
     ##select delivery option
     driver.implicitly_wait(0.5)
-    delivery = driver.find_element(by=By.ID, value='delivery_option_1')
-    try:
-        WebDriverWait(driver,timeout).until(EC.element_to_be_clickable(delivery))
-        delivery.click()
-    except: pass
+    input(...)
+    delivery = driver.find_element(by=By.ID, value='delivery_option_36')
+    delivery.click()
     driver.find_element(by=By.XPATH, value="//button[@name='confirmDeliveryOption']").click()
     driver.implicitly_wait(0.5)
     payment = driver.find_element(by=By.XPATH, value="//input[@id='payment-option-2']")
@@ -319,7 +320,7 @@ def enter_address():
 
 def place_order():
     ##order
-    driver.get("http://localhost:8080")
+    driver.get("https://localhost:8080")
     cart = driver.find_element(by=By.ID, value="_desktop_cart")
     if cart.is_enabled:
         cart_url = cart.find_element(by=By.XPATH, value=".//a").get_attribute('href')

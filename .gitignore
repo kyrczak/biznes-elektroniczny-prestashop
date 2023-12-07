@@ -5,3 +5,6 @@
 **/__pycache__/
 /scripts/backups/
 **/db_dump/
+**.key
+**.crt
+**.conf
