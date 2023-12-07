@@ -3,6 +3,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
 from unidecode import unidecode
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import time
 import calendar
 import random
@@ -39,6 +41,61 @@ def next_page():
         driver.get(btn.get_attribute('href'))
     except:
         pass
+
+
+def add_product_s():
+    timeout = 1
+    ##on category screen
+    products = driver.find_elements(by=By.XPATH, value="//div[@class='thumbnail-top']")
+    selected_product = random.choice(products)
+    try:
+        selected_product.click()
+    except:
+        return
+
+    driver.implicitly_wait(1)
+    #set_quantity
+    add_to_cart = driver.find_element(by=By.XPATH, value="//button[contains(@class, 'add-to-cart')]")
+    if(not add_to_cart.is_enabled):
+        #categoryOptions[-2].click() ## go back
+        return
+    quantity = random.randrange(5,10)
+    
+    for i in range(quantity):
+       ##added product to the cart
+        print(i)
+        try:
+            WebDriverWait(driver,timeout).until(EC.staleness_of(add_to_cart))
+            add_to_cart = driver.find_element(by=By.XPATH, value="//button[contains(@class, 'add-to-cart')]")
+        except:
+            pass
+        try:
+            add_to_cart = driver.find_element(by=By.XPATH, value="//button[contains(@class, 'add-to-cart')]")
+            WebDriverWait(driver,timeout).until(EC.element_to_be_clickable(add_to_cart))
+        except:
+            break
+        if(not add_to_cart.is_enabled):
+            break
+        add_to_cart.click()
+        #WebDriverWait(driver,1).until(EC.element_to_be_clickable(continue_shopping))
+        continue_shopping = driver.find_element(by=By.XPATH, value="//div[@class='cart-content-btn']/button")
+        try:
+            WebDriverWait(driver,timeout).until(EC.staleness_of(continue_shopping))
+            continue_shopping = driver.find_element(by=By.XPATH, value="//div[@class='cart-content-btn']/button")
+        except:
+            pass
+        try:
+            WebDriverWait(driver,timeout).until(EC.element_to_be_clickable(continue_shopping))
+        except:
+            break
+        continue_shopping.click()
+
+    #time.sleep(1)
+    #driver.find_element(by=By.XPATH, value="//div[@class='cart-content-btn']/button[@class='btn btn-secondary']").click() ##close 'added to cart' screen
+    #categoryOptions = driver.find_elements(by=By.XPATH, value="//nav[@class='breadcrumb hidden-sm-down']/ol/li")
+    #categoryOptions[-2].click() ## go back
+    #driver.implicitly_wait(2)
+
 
 
 def add_product():
@@ -92,32 +149,60 @@ def select_category(main = 1, sub = 1):
 
 
 ##ADDING PRODUCTS
-def add_products():
+def add_products(full = False):
     select_category(0,2)
+    driver.implicitly_wait(2)
+    products_url = driver.current_url
+    print(products_url)
+    
     #add 3 products from this page
     for _ in range(3):
-        add_product()
-    for _ in range(3):
-        next_page()
-        #input('...')
+        add_product_s()
+        driver.get(products_url)
         driver.implicitly_wait(2)
-        add_product()
+    
+    if(full == False):
+        return
+    
+    next_page()
+    driver.implicitly_wait(2)
+    products_url = driver.current_url
+    for _ in range(3):
+        add_product_s()
+        driver.get(products_url)
+        driver.implicitly_wait(2)
 
     select_category(1,1)
+    driver.implicitly_wait(2)
+    products_url = driver.current_url
     for _ in range(3):
-        add_product()
-    for _ in range(3):
-        next_page()
+        add_product_s()
+        driver.get(products_url)
         driver.implicitly_wait(2)
-        add_product()
+    
+    next_page()
+    driver.implicitly_wait(2)
+    products_url = driver.current_url
+    for _ in range(3):
+        add_product_s()
+        driver.get(products_url)
+        driver.implicitly_wait(2)
 
     select_category(3,3)
+    driver.implicitly_wait(2)
+    products_url = driver.current_url
     for _ in range(3):
-        add_product()
-    for _ in range(3):
-        next_page()
+        add_product_s()
+        driver.get(products_url)
         driver.implicitly_wait(2)
-        add_product()
+
+    next_page()
+    driver.implicitly_wait(2)
+    products_url = driver.current_url
+    for _ in range(3):
+        add_product_s()
+        driver.get(products_url)
+        driver.implicitly_wait(2)
 
 def search_and_add():
     ##search for products
@@ -127,7 +212,7 @@ def search_and_add():
     search_bar.click()
     search_bar.send_keys(searchTerm)
     search_bar.send_keys(Keys.RETURN)
-    add_product()
+    add_product_s()
 
 
 def edit_cart():
@@ -136,9 +221,7 @@ def edit_cart():
     cart = driver.find_element(by=By.ID, value="_desktop_cart")
     if cart.is_enabled:
         cart_url = cart.find_element(by=By.XPATH, value=".//a").get_attribute('href')
-        print(cart_url)
         driver.get(cart_url)
-        print(cart_url)
 
         ##in cart
         for i in range(3):
@@ -150,14 +233,14 @@ def edit_cart():
 
 def register():
 #register
-    driver.get("http://localhost:8080")
-    account_url = driver.find_element(by=By.XPATH, value="//div[@class='user-info']").find_element(by=By.XPATH, value=".//a").get_attribute('href')
-    print(account_url)
-    driver.get(account_url)
+    #driver.get("http://localhost:8080")
+    #account_url = driver.find_element(by=By.XPATH, value="//div[@class='user-info']").find_element(by=By.XPATH, value=".//a").get_attribute('href')
+    #print(account_url)
+    #driver.get(account_url)
     #on account page
-    login_url = driver.find_element(by=By.XPATH, value="//div[@class='no-account']").find_element(by=By.XPATH, value = './/a').get_attribute('href')
-    driver.get(login_url)
-    driver.implicitly_wait(2)
+    #login_url = driver.find_element(by=By.XPATH, value="//div[@class='no-account']").find_element(by=By.XPATH, value = './/a').get_attribute('href')
+    #driver.get(login_url)
+    #driver.implicitly_wait(2)
     ##on registration page
     with open('imiona.csv') as names:
         with open('nazwiska.csv') as surnames:
@@ -195,16 +278,74 @@ def register():
             rodo_checkbox.click()
 
             ##submit
-            driver.find_element(by=By.XPATH, value="//button[contains(@class, 'form-control-submit')]").click()
-            ##on main page
+            driver.find_element(by=By.XPATH, value="//button[@name='continue']").click()
+
+def enter_address():
+    timeout = 1
+    
+    address_input = driver.find_element(by=By.ID, value='field-address1')
+    code_input = driver.find_element(by=By.ID, value='field-postcode')
+    city_input = driver.find_element(by=By.ID, value='field-city')
+    city='Wolne Miasto Gdańsk'
+    addr='ul. Gdyńska 1'
+    postcode = '80-340'
+    address_input.click()
+    address_input.send_keys(addr)
+    city_input.click()
+    city_input.send_keys(city)
+    code_input.click()
+    code_input.send_keys(postcode)
+
+    next = driver.find_element(by=By.XPATH, value="//button[@name='confirm-addresses']")
+    next.click()
+
+    ##select delivery option
+    driver.implicitly_wait(0.5)
+    delivery = driver.find_element(by=By.ID, value='delivery_option_1')
+    try:
+        WebDriverWait(driver,timeout).until(EC.element_to_be_clickable(delivery))
+        delivery.click()
+    except: pass
+    driver.find_element(by=By.XPATH, value="//button[@name='confirmDeliveryOption']").click()
+    driver.implicitly_wait(0.5)
+    payment = driver.find_element(by=By.XPATH, value="//input[@id='payment-option-2']")
+    #WebDriverWait(driver,timeout).until(EC.element_to_be_clickable(payment))
+    #input('....')
+    payment.click()
+    driver.find_element(by=By.ID, value='conditions_to_approve[terms-and-conditions]').click()
+    driver.implicitly_wait(0.5)
+    confirm_order = driver.find_element(by=By.XPATH, value="//button[contains(text(), 'Złóż zamówienie')]")
+    confirm_order.click()
+
+def place_order():
+    ##order
+    driver.get("http://localhost:8080")
+    cart = driver.find_element(by=By.ID, value="_desktop_cart")
+    if cart.is_enabled:
+        cart_url = cart.find_element(by=By.XPATH, value=".//a").get_attribute('href')
+        driver.get(cart_url)
+    ##in cart
+    order_btn = driver.find_element(by=By.XPATH, value="//div[@class='card cart-summary']//a[@class='btn btn-primary']")
+    order_btn.click()
+    driver.implicitly_wait(2)
+    register()
+    enter_address()
+
+
+
+
+
+#register
+add_products(full=False)
+search_and_add()
+edit_cart()
+place_order()
 
 
 
 
 
 
-#add_products()
-#edit_cart()
 
 input("...")
 
