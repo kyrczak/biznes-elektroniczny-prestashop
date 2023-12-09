@@ -15,7 +15,6 @@ options.add_argument('ignore-certificate-errors')
 driver = webdriver.Chrome(options=options)
 
 driver.get("https://localhost:8080")
-input('...')
 
 def back():
     driver.navigate().back()
@@ -62,7 +61,7 @@ def add_product_s():
     if(not add_to_cart.is_enabled):
         #categoryOptions[-2].click() ## go back
         return
-    quantity = random.randrange(5,10)
+    quantity = random.randrange(1,2)
     
     for i in range(quantity):
        ##added product to the cart
@@ -251,6 +250,7 @@ def register():
             surname = random.choice(surnames.readlines()[:500]).split(',')[0].lower().capitalize()
             print(name, surname)
             mail = name + '.' + surname + '@student.debil.pl'
+            #mail = 'beprojekteti@outlook.com'
             mail = unidecode(mail)
             year = random.randrange(1930, 2023)
             month = random.randrange(1,13)
@@ -304,7 +304,6 @@ def enter_address():
 
     ##select delivery option
     driver.implicitly_wait(0.5)
-    input(...)
     delivery = driver.find_element(by=By.ID, value='delivery_option_36')
     delivery.click()
     driver.find_element(by=By.XPATH, value="//button[@name='confirmDeliveryOption']").click()
@@ -332,25 +331,25 @@ def place_order():
     register()
     enter_address()
 
+def check_order():
+    ##check order status & get invoice
+    driver.find_element(by=By.XPATH, value="//a[@class='account']").click()
+    driver.implicitly_wait(1)
+    driver.find_element(by=By.ID, value="history-link").click()
+    driver.implicitly_wait(1)
+    driver.find_element(by=By.XPATH, value="//a[@data-link-action='view-order-details']").click()
 
+    #mail = 'beprojekteti@outlook.com'
+    #passwd = 'biznesproj23'
+    driver.implicitly_wait(2)
+    driver.find_element(by=By.XPATH, value="//a[contains(text(), 'Pobierz fakturę')]").click()
 
-
-
-#register
 add_products(full=False)
 search_and_add()
 edit_cart()
 place_order()
-
-
-
-
-
-
+check_order()
 
 input("...")
-
-
-
 
 driver.quit()
