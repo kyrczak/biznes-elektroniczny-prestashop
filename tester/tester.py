@@ -53,15 +53,18 @@ def add_product_s():
     try:
         selected_product.click()
     except:
+        print("product unavailable")
         return
 
-    driver.implicitly_wait(1)
+    driver.implicitly_wait(0.5)
     #set_quantity
     add_to_cart = driver.find_element(by=By.XPATH, value="//button[contains(@class, 'add-to-cart')]")
     if(not add_to_cart.is_enabled):
+        print("button was inactive at the beginning")
         #categoryOptions[-2].click() ## go back
         return
-    quantity = random.randrange(1,2)
+    
+    quantity = random.randrange(1,5)
     
     for i in range(quantity):
        ##added product to the cart
@@ -73,55 +76,32 @@ def add_product_s():
             pass
         try:
             add_to_cart = driver.find_element(by=By.XPATH, value="//button[contains(@class, 'add-to-cart')]")
+            
             WebDriverWait(driver,timeout).until(EC.element_to_be_clickable(add_to_cart))
         except:
-            break
-        if(not add_to_cart.is_enabled):
+            print("button didn't become active")
             break
         add_to_cart.click()
-        #WebDriverWait(driver,1).until(EC.element_to_be_clickable(continue_shopping))
+        try:
+            WebDriverWait(driver,timeout+1).until(EC.presence_of_element_located((By.XPATH,"//div[@class='cart-content-btn']/button")))
+        except:
+            print("continue btn does not exist")
+            break
+        
         continue_shopping = driver.find_element(by=By.XPATH, value="//div[@class='cart-content-btn']/button")
+        if(i != 0):
+            try:
+                WebDriverWait(driver,timeout+1).until(EC.staleness_of(continue_shopping))
+                continue_shopping = driver.find_element(by=By.XPATH, value="//div[@class='cart-content-btn']/button")
+            except:
+                pass
         try:
-            WebDriverWait(driver,timeout).until(EC.staleness_of(continue_shopping))
-            continue_shopping = driver.find_element(by=By.XPATH, value="//div[@class='cart-content-btn']/button")
+            WebDriverWait(driver,timeout+1).until(EC.element_to_be_clickable(continue_shopping))
         except:
-            pass
-        try:
-            WebDriverWait(driver,timeout).until(EC.element_to_be_clickable(continue_shopping))
-        except:
+            print("continue btn unavailavle")
             break
         continue_shopping.click()
 
-    #time.sleep(1)
-    #driver.find_element(by=By.XPATH, value="//div[@class='cart-content-btn']/button[@class='btn btn-secondary']").click() ##close 'added to cart' screen
-    #categoryOptions = driver.find_elements(by=By.XPATH, value="//nav[@class='breadcrumb hidden-sm-down']/ol/li")
-    #categoryOptions[-2].click() ## go back
-    #driver.implicitly_wait(2)
-
-
-
-def add_product():
-    ##on category screen
-    products = driver.find_elements(by=By.XPATH, value="//div[@class='thumbnail-top']")
-    selected_product = random.choice(products)
-    selected_product.click()
-    driver.implicitly_wait(2)
-    #set_quantity
-    add_to_cart = driver.find_element(by=By.XPATH, value="//button[contains(@class, 'add-to-cart')]")
-    if(not add_to_cart.is_enabled):
-        categoryOptions[-2].click() ## go back
-        return
-    quantity_input = driver.find_element(by=By.ID, value="quantity_wanted")
-    quantity = random.randrange(1,2)
-    quantity_input.click()
-    quantity_input.send_keys(Keys.BACKSPACE) 
-    quantity_input.send_keys(str(quantity)) ##enter number of products
-    add_to_cart.click() ##added product to the cart     
-    #time.sleep(1)
-    #driver.find_element(by=By.XPATH, value="//div[@class='cart-content-btn']/button[@class='btn btn-secondary']").click() ##close 'added to cart' screen
-    categoryOptions = driver.find_elements(by=By.XPATH, value="//nav[@class='breadcrumb hidden-sm-down']/ol/li")
-    categoryOptions[-2].click() ## go back
-    driver.implicitly_wait(2)
 
 def element_exists(method, val):
     try:
@@ -227,23 +207,15 @@ def edit_cart():
 
         ##in cart
         for i in range(3):
+            time.sleep(1)
             delete_btns = driver.find_elements(by=By.XPATH, value="//a[@class='remove-from-cart']")
             print("BTNS COUNT = " + str(len(delete_btns)))
-            btn_to_click = random.choice(delete_btns)
-            btn_to_click.click()
+            if(len(delete_btns)>1):
+                btn_to_click = random.choice(delete_btns)
+                btn_to_click.click()
             #driver.get(cart_url)
 
 def register():
-#register
-    #driver.get("https://localhost:8080")
-    #account_url = driver.find_element(by=By.XPATH, value="//div[@class='user-info']").find_element(by=By.XPATH, value=".//a").get_attribute('href')
-    #print(account_url)
-    #driver.get(account_url)
-    #on account page
-    #login_url = driver.find_element(by=By.XPATH, value="//div[@class='no-account']").find_element(by=By.XPATH, value = './/a').get_attribute('href')
-    #driver.get(login_url)
-    #driver.implicitly_wait(2)
-    ##on registration page
     with open('imiona.csv') as names:
         with open('nazwiska.csv') as surnames:
             name = random.choice(names.readlines()[:500]).split(',')[0].lower().capitalize()
@@ -303,17 +275,22 @@ def enter_address():
     next.click()
 
     ##select delivery option
-    driver.implicitly_wait(0.5)
-    delivery = driver.find_element(by=By.ID, value='delivery_option_36')
-    delivery.click()
+    driver.implicitly_wait(1)
+    input('...')
+    delivery_options=driver.find_elements(by=By.XPATH, value="//input[contains(@id,'delivery_option')]")
+
+    delivery = random.choice(delivery_options)
+    try:
+        delivery.click()
+    except:pass
     driver.find_element(by=By.XPATH, value="//button[@name='confirmDeliveryOption']").click()
-    driver.implicitly_wait(0.5)
+    driver.implicitly_wait(1)
     payment = driver.find_element(by=By.XPATH, value="//input[@id='payment-option-2']")
     #WebDriverWait(driver,timeout).until(EC.element_to_be_clickable(payment))
     #input('....')
     payment.click()
     driver.find_element(by=By.ID, value='conditions_to_approve[terms-and-conditions]').click()
-    driver.implicitly_wait(0.5)
+    driver.implicitly_wait(1)
     confirm_order = driver.find_element(by=By.XPATH, value="//button[contains(text(), 'Złóż zamówienie')]")
     confirm_order.click()
 
@@ -344,12 +321,11 @@ def check_order():
     driver.implicitly_wait(2)
     driver.find_element(by=By.XPATH, value="//a[contains(text(), 'Pobierz fakturę')]").click()
 
-add_products(full=False)
+add_products(full=True)
 search_and_add()
 edit_cart()
 place_order()
 check_order()
-
 input("...")
 
 driver.quit()
