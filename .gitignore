@@ -6,3 +6,5 @@
 **/db_dump/
 **/images/
 **/backups/
+*.key
+*.crt
