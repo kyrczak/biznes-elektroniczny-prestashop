@@ -16,7 +16,7 @@ def remove_categories():
 
     # Get the list of categories
     categories_url = API_DEFAULT_LINK + 'categories' + f'?ws_key={API_KEY}'
-    response = requests.get(categories_url, verify=False)
+    response = requests.get(categories_url)
     root = fromstring(response.content)
 
     category_ids = [category.get('id') for category in root.findall('.//category')]
@@ -26,7 +26,7 @@ def remove_categories():
         if category_id == "1" or category_id == "2":
             continue
         category_delete_url = API_DEFAULT_LINK + f'categories/{category_id}?ws_key={API_KEY}'
-        delete_response = requests.delete(category_delete_url,verify=False)
+        delete_response = requests.delete(category_delete_url)
 
         if delete_response.status_code == 200 or delete_response.status_code == 404:
             print(f"Category {category_id} deleted successfully.")
@@ -36,7 +36,7 @@ def remove_products():
 
     # Get the list of categories
     products_url = API_DEFAULT_LINK + 'products' + f'?ws_key={API_KEY}'
-    response = requests.get(products_url,verify=False)
+    response = requests.get(products_url)
     root = fromstring(response.content)
 
     product_ids = [product.get('id') for product in root.findall('.//product')]
@@ -44,7 +44,7 @@ def remove_products():
     # Iterate through the category IDs and delete each one
     for product_id in product_ids:
         product_delete_url = API_DEFAULT_LINK + f'products/{product_id}?ws_key={API_KEY}'
-        delete_response = requests.delete(product_delete_url,verify=False)
+        delete_response = requests.delete(product_delete_url)
         print(delete_response.status_code)
         if delete_response.status_code == 200 or delete_response.status_code == 404:
             print(f"product {product_id} deleted successfully.")
@@ -229,27 +229,27 @@ def add_features(product_attributes):
 def remove_features():
     # Get the list of categories
     products_url = API_DEFAULT_LINK + 'product_features' + f'?ws_key={API_KEY}'
-    response = requests.get(products_url,verify=False)
+    response = requests.get(products_url)
     root = fromstring(response.content)
     product_ids = [product.get('id') for product in root.findall('.//product_feature')]
     print(product_ids)
     # Iterate through the category IDs and delete each one
     for product_id in product_ids:
         product_delete_url = API_DEFAULT_LINK + f'product_features/{product_id}?ws_key={API_KEY}'
-        delete_response = requests.delete(product_delete_url,verify=False)
+        delete_response = requests.delete(product_delete_url)
         print(delete_response.status_code)
         if delete_response.status_code == 200 or delete_response.status_code == 404:
             print(f"product feature {product_id} deleted successfully.")
     
     products_url = API_DEFAULT_LINK + 'product_feature_values' + f'?ws_key={API_KEY}'
-    response = requests.get(products_url,verify=False)
+    response = requests.get(products_url)
     root = fromstring(response.content)
     product_ids = [product.get('id') for product in root.findall('.//product_feature_value')]
     print(product_ids)
     # Iterate through the category IDs and delete each one
     for product_id in product_ids:
         product_delete_url = API_DEFAULT_LINK + f'product_feature_values/{product_id}?ws_key={API_KEY}'
-        delete_response = requests.delete(product_delete_url,verify=False)
+        delete_response = requests.delete(product_delete_url)
         print(delete_response.status_code)
         if delete_response.status_code == 200 or delete_response.status_code == 404:
             print(f"product_feature_value {product_id} deleted successfully.")
@@ -258,13 +258,12 @@ def remove_features():
 
 
 if __name__ == "__main__":
-    requests.packages.urllib3.disable_warnings(requests.packages.urllib3.exceptions.InsecureRequestWarning)
     prestashop = prestapyt.PrestaShopWebServiceDict(
         API_DEFAULT_LINK, API_KEY)
 
     remove_categories()
-    remove_products()
-    remove_features()
+    #remove_products()
+    #remove_features()
 
     category_schema = prestashop.get('categories', options={'schema': 'blank'})
     product_schema = prestashop.get('products', options={'schema': 'blank'})
@@ -272,5 +271,5 @@ if __name__ == "__main__":
     del product_schema["product"]["associations"]["combinations"]
 
 
-    process_categories()
-    process_products()
+    #process_categories()
+    #process_products()
