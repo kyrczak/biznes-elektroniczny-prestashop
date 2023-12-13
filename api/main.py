@@ -97,13 +97,13 @@ def add_product(product):
     product_schema["product"]["show_price"] = 1
     product_schema["product"]["id_shop_default"] = 1
 
-    sem.acquire()
+
     features = add_features(product["attributes"])
     
    
     if features is not None:
         product_schema["product"]["associations"]["product_features"]["product_feature"] = features
-    sem.release()
+
     website_product_id = prestashop.add("products", product_schema)["prestashop"]["product"]["id"]
     add_product_images(product["id"], website_product_id)
     add_stock(website_product_id, product["attributes"]["amount"])
@@ -163,23 +163,22 @@ def process_products():
     except:
         print("Problem z products.json")
         return
+    
+    for product in products_data:
+        prod ={
+                "id": product["id"],
+                "price": product["price"],
+                "name": product["name"],
+                "short_description": product["short_description"],
+                "category": product["category"],
+                "attributes": product["attributes"],
+                "manufacturer": product["manufacturer"],
+                "full_description": product["full_description"]
+            }
+        print("Adding product: ", prod["name"])
+        add_product(prod)
         
-    with ThreadPoolExecutor(max_workers=15) as executor:
-        executor.map(process_product, products_data)
-        
-def process_product(product):
-    prod ={
-            "id": product["id"],
-            "price": product["price"],
-            "name": product["name"],
-            "short_description": product["short_description"],
-            "category": product["category"],
-            "attributes": product["attributes"],
-            "manufacturer": product["manufacturer"],
-            "full_description": product["full_description"]
-        }
-    print("Adding product: ", prod["name"])
-    add_product(prod)
+
 
 def add_features(product_attributes):
     feature_schema = prestashop.get("product_features", options={
@@ -262,8 +261,8 @@ if __name__ == "__main__":
         API_DEFAULT_LINK, API_KEY)
 
     remove_categories()
-    #remove_products()
-    #remove_features()
+    remove_products()
+    remove_features()
 
     category_schema = prestashop.get('categories', options={'schema': 'blank'})
     product_schema = prestashop.get('products', options={'schema': 'blank'})
@@ -271,5 +270,5 @@ if __name__ == "__main__":
     del product_schema["product"]["associations"]["combinations"]
 
 
-    #process_categories()
-    #process_products()
+    process_categories()
+    process_products()
