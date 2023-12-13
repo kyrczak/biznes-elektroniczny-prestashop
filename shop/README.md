@@ -32,6 +32,7 @@ user `root`,
 
 haslo `admin`
 
+
 jak się zainstaluje zmienamy nazwę folderu admin na dowolną inną np admin1 i usuwamy folder `install`. Oba są w `prestashop/src/`.
 
 
@@ -57,3 +58,4 @@ docker-compose up -d
 ```c++
 docker-compose down
 ```
+
