@@ -14,7 +14,7 @@ options.add_argument('ignore-certificate-errors')
 
 driver = webdriver.Chrome(options=options)
 
-driver.get("https://localhost:8080")
+driver.get("https://localhost/")
 
 def back():
     driver.navigate().back()
@@ -157,7 +157,7 @@ def add_products(full = False):
     select_category(1,1)
     driver.implicitly_wait(2)
     products_url = driver.current_url
-    for _ in range(3):
+    for _ in range(2):
         add_product_s()
         driver.get(products_url)
         driver.implicitly_wait(2)
@@ -165,15 +165,15 @@ def add_products(full = False):
     next_page()
     driver.implicitly_wait(2)
     products_url = driver.current_url
-    for _ in range(3):
+    for _ in range(1):
         add_product_s()
         driver.get(products_url)
         driver.implicitly_wait(2)
 
-    select_category(3,3)
+    select_category(2,2)
     driver.implicitly_wait(2)
     products_url = driver.current_url
-    for _ in range(3):
+    for _ in range(2):
         add_product_s()
         driver.get(products_url)
         driver.implicitly_wait(2)
@@ -181,7 +181,7 @@ def add_products(full = False):
     next_page()
     driver.implicitly_wait(2)
     products_url = driver.current_url
-    for _ in range(3):
+    for _ in range(2):
         add_product_s()
         driver.get(products_url)
         driver.implicitly_wait(2)
@@ -189,7 +189,7 @@ def add_products(full = False):
 def search_and_add():
     ##search for products
     searchTerm = "konewka"
-    driver.get("https://localhost:8080")
+    driver.get("https://localhost/")
     search_bar = driver.find_element(by=By.XPATH, value="//input[@class='ui-autocomplete-input']")
     search_bar.click()
     search_bar.send_keys(searchTerm)
@@ -199,7 +199,7 @@ def search_and_add():
 
 def edit_cart():
     ##enter cart
-    driver.get("https://localhost:8080")
+    driver.get("https://localhost/")
     cart = driver.find_element(by=By.ID, value="_desktop_cart")
     if cart.is_enabled:
         cart_url = cart.find_element(by=By.XPATH, value=".//a").get_attribute('href')
@@ -276,7 +276,6 @@ def enter_address():
 
     ##select delivery option
     driver.implicitly_wait(1)
-    input('...')
     delivery_options=driver.find_elements(by=By.XPATH, value="//input[contains(@id,'delivery_option')]")
 
     delivery = random.choice(delivery_options)
@@ -296,7 +295,7 @@ def enter_address():
 
 def place_order():
     ##order
-    driver.get("https://localhost:8080")
+    driver.get("https://localhost/")
     cart = driver.find_element(by=By.ID, value="_desktop_cart")
     if cart.is_enabled:
         cart_url = cart.find_element(by=By.XPATH, value=".//a").get_attribute('href')

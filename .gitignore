@@ -3,9 +3,8 @@
 /.vscode/
 **/venv/
 **/__pycache__/
-/scripts/backups/
 **/db_dump/
-**.key
-**.crt
-**.conf
-**.sql
+**/images/
+**/backups/
+*.key
+*.crt
