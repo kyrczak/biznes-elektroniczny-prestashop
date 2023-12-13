@@ -19,7 +19,7 @@ services:
       - mariadb
     ports:
       - 443:443
-      - 8080:443
+      - 8080:80
     environment:
       DB_SERVER: presta-mariadb
       DB_NAME: prestashop
