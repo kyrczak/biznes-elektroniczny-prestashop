@@ -71,7 +71,9 @@ class ProductSpider(scrapy.Spider):
         if item['short_description'] is None:
             return
   
-        item['full_description'] = prepare_full_description(description).replace("\n", "<br>")
+        item['full_description'] = (prepare_full_description(description).
+                                    replace("\n", "<br><br>"))
+        item['full_description'] = item['full_description'].replace("<br><br><br><br>", "<br><br>")
 
         if item['full_description'] is None:
             item['full_description'] = item['short_description']
@@ -230,7 +232,7 @@ def append_additional_materials(materials):
 def extract_technical_data(description):
     cm_pairs = re.findall(r'(?:(?<=-)|(?<=^))\s*([^\n:]+)\s*:\s*([\d,]+\s*(?:x\s*[\d,]+)?\s*cm\.?)\s*(?:\.\n|\n|$)', description)
     liter_pairs = re.findall(r'(?:(?<=-)|(?<=^))\s*([^\n:]+)\s*:\s*([\d,]+\s*(?:l|litr|litry|litrów))\s*(?:\.\n|\n|$)', description)
-
+    additional_pairs = re.compile(r'\s*-\s*(.*?)\s*-\s*(\d+cm)\n')
     # Combine the results from both patterns
     data_dict = {}
     for pair in cm_pairs:
@@ -240,7 +242,13 @@ def extract_technical_data(description):
         key, value = pair[:2]
         data_dict[key.strip()] = value.strip()
 
-    return data_dict
+    # Find additional pairs
+    if data_dict is not None:
+        return data_dict
+
+    for pair in additional_pairs.findall(description):
+        key, value = pair[:2]
+        data_dict[key.strip()] = value.strip()
 
 def prepare_full_description(description):
     # get first three sentences from description
