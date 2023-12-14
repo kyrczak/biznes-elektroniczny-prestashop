@@ -45,16 +45,21 @@ def next_page():
         pass
 
 
-def add_product_s():
+def add_product_s(index, randomItem=False):
     timeout = 1
     ##on category screen
     products = driver.find_elements(by=By.XPATH, value="//div[@class='thumbnail-top']")
-    selected_product = random.choice(products)
+    #selected_product = random.choice(products)
+    
     try:
+        if randomItem == False:
+            selected_product = products[index]
+        else:
+            selected_product = random.choice(products)
         selected_product.click()
     except:
         print("product unavailable")
-        return
+        return 0
 
     driver.implicitly_wait(0.5)
     #set_quantity
@@ -62,13 +67,14 @@ def add_product_s():
     if(not add_to_cart.is_enabled):
         print("button was inactive at the beginning")
         #categoryOptions[-2].click() ## go back
-        return
+        return 0
     
     quantity = random.randrange(1,5)
     
-    for i in range(quantity):
+    added = 0
+    while added < quantity:
        ##added product to the cart
-        print(i)
+        print(added)
         try:
             WebDriverWait(driver,timeout).until(EC.staleness_of(add_to_cart))
             add_to_cart = driver.find_element(by=By.XPATH, value="//button[contains(@class, 'add-to-cart')]")
@@ -82,6 +88,7 @@ def add_product_s():
             print("button didn't become active")
             break
         add_to_cart.click()
+        added += 1
         try:
             WebDriverWait(driver,timeout+1).until(EC.presence_of_element_located((By.XPATH,"//div[@class='cart-content-btn']/button")))
         except:
@@ -89,7 +96,7 @@ def add_product_s():
             break
         
         continue_shopping = driver.find_element(by=By.XPATH, value="//div[@class='cart-content-btn']/button")
-        if(i != 0):
+        if(added != 1):
             try:
                 WebDriverWait(driver,timeout+1).until(EC.staleness_of(continue_shopping))
                 continue_shopping = driver.find_element(by=By.XPATH, value="//div[@class='cart-content-btn']/button")
@@ -101,6 +108,7 @@ def add_product_s():
             print("continue btn unavailavle")
             break
         continue_shopping.click()
+    return added
 
 
 def element_exists(method, val):
@@ -132,14 +140,18 @@ def select_category(main = 1, sub = 1):
 
 ##ADDING PRODUCTS
 def add_products(full = False):
-    select_category(0,2)
+    select_category(0,3)
     driver.implicitly_wait(2)
     products_url = driver.current_url
     print(products_url)
     
     #add 3 products from this page
-    for _ in range(3):
-        add_product_s()
+    added = 0
+    current_index = 0
+    while added < 3:
+        if add_product_s(current_index) != 0:
+            added += 1
+        current_index += 1
         driver.get(products_url)
         driver.implicitly_wait(2)
     
@@ -149,40 +161,37 @@ def add_products(full = False):
     next_page()
     driver.implicitly_wait(2)
     products_url = driver.current_url
-    for _ in range(3):
-        add_product_s()
+    added = 0
+    current_index = 0
+    while added < 3:
+        if add_product_s(current_index) != 0:
+            added += 1
+        current_index += 1
         driver.get(products_url)
         driver.implicitly_wait(2)
 
     select_category(1,1)
     driver.implicitly_wait(2)
     products_url = driver.current_url
-    for _ in range(2):
-        add_product_s()
+    added = 0
+    current_index = 0
+    while added < 2:
+        if add_product_s(current_index) != 0:
+            added += 1
+        current_index += 1
+        print(f'index{current_index}')
         driver.get(products_url)
         driver.implicitly_wait(2)
     
     next_page()
     driver.implicitly_wait(2)
     products_url = driver.current_url
-    for _ in range(1):
-        add_product_s()
-        driver.get(products_url)
-        driver.implicitly_wait(2)
-
-    select_category(2,2)
-    driver.implicitly_wait(2)
-    products_url = driver.current_url
-    for _ in range(2):
-        add_product_s()
-        driver.get(products_url)
-        driver.implicitly_wait(2)
-
-    next_page()
-    driver.implicitly_wait(2)
-    products_url = driver.current_url
-    for _ in range(2):
-        add_product_s()
+    added = 0
+    current_index = 0
+    while added < 2:
+        if add_product_s(current_index) != 0:
+            added += 1
+        current_index += 1
         driver.get(products_url)
         driver.implicitly_wait(2)
 
@@ -194,7 +203,9 @@ def search_and_add():
     search_bar.click()
     search_bar.send_keys(searchTerm)
     search_bar.send_keys(Keys.RETURN)
-    add_product_s()
+    if add_product_s(index=-1,randomItem=True) == 0:
+        search_and_add()
+
 
 
 def edit_cart():
