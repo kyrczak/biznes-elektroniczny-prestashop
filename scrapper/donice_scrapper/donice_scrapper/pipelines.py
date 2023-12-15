@@ -14,8 +14,8 @@ class DoniceScrapperPipeline(ImagesPipeline):
     def get_media_requests(self, item, info):
          
          for image_url in item['image_urls']:
-            path = os.path.splitext(image_url)[0]
-            filename = os.path.basename(path)
+            path = image_url.split('/')
+            filename = path[-2] + '-' + path[-1]
             yield Request(image_url, meta={'item': item, 'filename': filename})
         
 
