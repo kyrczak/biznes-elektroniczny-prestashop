@@ -72,7 +72,7 @@ password: biznesproj23
 ## Backup scripts
 The backup scripts are prepared for Linux. 
 
-The newest backup is available [here](https://drive.google.com/file/d/1v7w9ODVk16-KHR9Bfs86ffNNIsG1xg9z/view?usp=sharing).
+The newest backup is available [here](https://drive.google.com/file/d/17NP5F4ZKQ2uiaeoQXu0gVDvBfRxmnVQ4/view?usp=sharing).
 
 ## Get backup
 To restore the backup stop the website and put the backup archive in `scripts/backups/` folder (only one backup file should be in the folder), go to `scripts` folder and run:
