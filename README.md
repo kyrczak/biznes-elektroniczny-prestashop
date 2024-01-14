@@ -1,4 +1,4 @@
-# Doncie Hermiony - Prestashop store project
+# Donice Hermiony - Prestashop store project
 College project for "Electronic Business" course. The goal was to create a store using Prestashop with scrapped products from a real web store.
 
 The products and images were gathered from [https://www.sklep-kwiecisty.pl/](https://www.sklep-kwiecisty.pl/). The data and images were scrapped using Scrapy. The data was then imported to Prestashop using a custom Python script.
