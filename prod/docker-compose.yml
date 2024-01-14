@@ -1,0 +1,42 @@
+version: '3'
+
+services:
+  memcached:
+    image: memcached
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 2
+        window: 140s
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+    networks:
+      - admin-mysql_default
+  prestashop:
+    image: komeg1/be-prestashop-189642:latest
+    ports:
+      - 18861:443
+    depends_on:
+      - memcached
+    environment:
+      PS_DEV_MODE: 1
+    deploy:
+     restart_policy:
+       condition: on-failure
+       delay: 5s
+       max_attempts: 2
+       window: 60s
+     resources:
+       limits:
+         cpus: '0.5'
+         memory: 512M
+    networks:
+      - admin-mysql_default
+    entrypoint: bash /db_dump/init_db.sh
+
+networks:
+  admin-mysql_default:
+    external: true
