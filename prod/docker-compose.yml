@@ -3,9 +3,10 @@ version: '3'
 services:
   prestashop:
     image: komeg1/be-prestashop-189642:latest
-    user: root
     ports:
       - 18861:443
+    environment:
+      PS_DEV_MODE: 1
     deploy:
      restart_policy:
        condition: on-failure
@@ -16,17 +17,10 @@ services:
        limits:
          cpus: '0.5'
          memory: 512M
-
     networks:
       - admin-mysql_default
-    entrypoint: 
+    entrypoint: bash /db_dump/init_db.sh
 
-  networks:
-    admin-mysql_default:
-      external: true
-  
-  volumes:
-    BE_188618:
-    
-    
-        
+networks:
+  admin-mysql_default:
+    external: true

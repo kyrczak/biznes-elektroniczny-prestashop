@@ -12,13 +12,16 @@ services:
       - ./mariadb:/var/lib/mysql
     ports:
       - 3306:3306
-
+  memcached:
+    image: memcached
+    restart: always
   prestashop:
     container_name: prestashop
     image: prestashop/prestashop:1.7.8.10-apache
     restart: always
     depends_on:
       - mariadb
+      - memcached
     ports:
       - 443:443
       - 18861:443
@@ -28,8 +31,6 @@ services:
       DB_USER: root
       DB_PASSWD: student
       PS_INSTALL_AUTO: 0
-      PS_FOLDER_ADMIN: admin
-      PS_FOLDER_INSTALL: install  
       PS_LANGUAGE: pl
       PS_COUNTRY: PL
       PS_DEV_MODE: 1
