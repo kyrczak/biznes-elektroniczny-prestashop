@@ -1,15 +1,17 @@
 version: '3'
 services:
   mariadb:
-    container_name: presta-mariadb
+    container_name: db
     image: mariadb:10
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: admin
-      MYSQL_DATABASE: prestashop
+      MYSQL_ROOT_PASSWORD: student
+      MYSQL_DATABASE: BE_188618
     volumes:
       - ./db_dump:/docker-entrypoint-initdb.d
       - ./mariadb:/var/lib/mysql
+    ports:
+      - 3306:3306
 
   prestashop:
     container_name: prestashop
@@ -19,12 +21,12 @@ services:
       - mariadb
     ports:
       - 443:443
-      - 8080:80
+      - 18861:443
     environment:
-      DB_SERVER: presta-mariadb
-      DB_NAME: prestashop
+      DB_SERVER: db
+      DB_NAME: BE_188618
       DB_USER: root
-      DB_PASSWD: admin
+      DB_PASSWD: student
       PS_INSTALL_AUTO: 0
       PS_FOLDER_ADMIN: admin
       PS_FOLDER_INSTALL: install  

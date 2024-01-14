@@ -1,0 +1,32 @@
+version: '3'
+
+services:
+  prestashop:
+    image: komeg1/be-prestashop-189642:latest
+    user: root
+    ports:
+      - 18861:443
+    deploy:
+     restart_policy:
+       condition: on-failure
+       delay: 5s
+       max_attempts: 2
+       window: 60s
+     resources:
+       limits:
+         cpus: '0.5'
+         memory: 512M
+
+    networks:
+      - admin-mysql_default
+    entrypoint: 
+
+  networks:
+    admin-mysql_default:
+      external: true
+  
+  volumes:
+    BE_188618:
+    
+    
+        
