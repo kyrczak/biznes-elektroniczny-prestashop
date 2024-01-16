@@ -13,6 +13,7 @@ services:
     ports:
       - 3306:3306
   memcached:
+    container_name: BE_188618_memcached
     image: memcached
     restart: always
   prestashop:
@@ -23,7 +24,6 @@ services:
       - mariadb
       - memcached
     ports:
-      - 443:443
       - 18861:443
     environment:
       DB_SERVER: db
@@ -33,7 +33,7 @@ services:
       PS_INSTALL_AUTO: 0
       PS_LANGUAGE: pl
       PS_COUNTRY: PL
-      PS_DEV_MODE: 1
+      PS_DEV_MODE: 0
     volumes:
       - ./prestashop/src:/var/www/html
       - ./prestashop.crt:/etc/ssl/certs/prestashop.crt
@@ -44,7 +44,12 @@ services:
       - -c
       - |
         cp /etc/ssl/certs/prestashop.crt /usr/local/share/ca-certificates/prestashop.crt
+        apt-get update 
+        apt-get install -y libmemcached-dev zlib1g-dev 
+        pecl install memcached 
+        docker-php-ext-enable memcached
         update-ca-certificates
         a2ensite prestashop_ssl
         a2enmod ssl
         apache2-foreground
+        
