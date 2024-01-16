@@ -3,7 +3,6 @@
 /.vscode/
 **/venv/
 **/__pycache__/
-**/db_dump/
 **/images/
 **/backups/
 *.key
