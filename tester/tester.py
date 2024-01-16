@@ -9,12 +9,13 @@ import time
 import calendar
 import random
 
+shop_url = "https://localhost:18861/"
 options = webdriver.ChromeOptions()
 options.add_argument('ignore-certificate-errors')
 
 driver = webdriver.Chrome(options=options)
 
-driver.get("https://localhost/")
+driver.get(shop_url)
 
 def back():
     driver.navigate().back()
@@ -198,7 +199,7 @@ def add_products(full = False):
 def search_and_add():
     ##search for products
     searchTerm = "konewka"
-    driver.get("https://localhost/")
+    driver.get(shop_url)
     search_bar = driver.find_element(by=By.XPATH, value="//input[@class='ui-autocomplete-input']")
     search_bar.click()
     search_bar.send_keys(searchTerm)
@@ -210,7 +211,7 @@ def search_and_add():
 
 def edit_cart():
     ##enter cart
-    driver.get("https://localhost/")
+    driver.get(shop_url)
     cart = driver.find_element(by=By.ID, value="_desktop_cart")
     if cart.is_enabled:
         cart_url = cart.find_element(by=By.XPATH, value=".//a").get_attribute('href')
@@ -227,8 +228,8 @@ def edit_cart():
             #driver.get(cart_url)
 
 def register():
-    with open('imiona.csv') as names:
-        with open('nazwiska.csv') as surnames:
+    with open('imiona.csv', encoding='utf-8') as names:
+        with open('nazwiska.csv', encoding='utf-8') as surnames:
             name = random.choice(names.readlines()[:500]).split(',')[0].lower().capitalize()
             surname = random.choice(surnames.readlines()[:500]).split(',')[0].lower().capitalize()
             print(name, surname)
@@ -306,7 +307,7 @@ def enter_address():
 
 def place_order():
     ##order
-    driver.get("https://localhost/")
+    driver.get(shop_url)
     cart = driver.find_element(by=By.ID, value="_desktop_cart")
     if cart.is_enabled:
         cart_url = cart.find_element(by=By.XPATH, value=".//a").get_attribute('href')
