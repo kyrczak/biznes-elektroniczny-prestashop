@@ -9,6 +9,7 @@ The website was deployed using Docker and tested on Linux (WSL Ubuntu) with Sele
 - [Tech stack](#tech-stack)
 - [Run website](#run-website)
   - [Admin panel](#admin-panel)
+  - [Deploy on the university swarm cluster](#deploy-on-the-university-swarm-cluster)
 - [Backup](#backup)
     - [Backup scripts](#backup-scripts)
     - [Get backup](#get-backup)
@@ -27,42 +28,82 @@ Below are the docker images used in the project:\
 `prestashop 1.7.8.10-apache`,
 \
 `mariadb:10`
+\
+`memcached`
+
+
+### Full store image
+The ready-to-use image of the store is available under\
+`komeg1/be-prestashop-189642:1.0`
 
 # Tech stack
 - Linux
 - Docker
+- Dockerfile
+- Memcached
 - Prestashop
 - MariaDB
 - Python 3
 - Scrapy
 - Selenium
-
+- OpenVPN
+- Google Analytics 4
 
 # Run website
-1. Go to `shop` folder
-2. Generate SSL certificate:
+
+## Running dev version locally
+The instruction for development version of the website is available on the main branch. 
+## Running prod version locally
+1. Go to the `shop` folder
+2. Run containers with
 ```bash
-openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout prestashop.key -out prestashop.crt -subj "/C=PL/ST=Pomeranian Voivodeship/L=Gdansk/O=Donice Hermiony/OU=Donice Hermiony/CN=localhost"
-```
-3. Run containers with docker-compose:
-```c++
 //Linux
-docker-compose up 
+docker-compose up
 //Windows
-docker compose up 
+docker compose up
 ```
-The website should be available at `https://localhost`. You will have to accept the certificate at first run.
 
+The website should be available at `https://localhost:18861/`
 
-To stop the website use:
-```c++
+To stop the website run:
+```bash
 //Linux
 docker-compose down
 //Windows
 docker compose down
 ```
+
+## Deploy on the university swarm cluster
+The production Dockerfile and docker-compose file are available under `prod` folder. 
+
+1. Connect to the university VPN
+2. Log in to the university swarm cluster with:
+```bash
+ssh rsww@172.20.83.101
+<input password>
+ssh hdoop@student-swarm01.maas
+<input password>
+```
+3. Go to the `BE_188618` folder in the students' directory
+`
+cd /opt/storage/actina
+`
+4. Deploy the website with:
+```bash
+sudo ./init.sh
+```
+
+To access the site you need to tunnel the `18861` port with:
+```bash
+ssh -L 18861:student-swarm01.maas:18861 rsww@172.20.83.101
+```
+
+The website should be available at `https://localhost:18861/`
+
+
+
 ## Admin panel
-To access admin panel go to ` https://localhost/admin1` and log in with:
+To access admin panel go to ` https://localhost:18861/admin1` and log in with:
 ```
 login: beprojeteti@outlook.com
 password: biznesproj23
@@ -72,7 +113,6 @@ password: biznesproj23
 ## Backup scripts
 The backup scripts are prepared for Linux. 
 
-The newest backup is available [here](https://drive.google.com/file/d/17NP5F4ZKQ2uiaeoQXu0gVDvBfRxmnVQ4/view?usp=sharing).
 
 ## Get backup
 To restore the backup stop the website and put the backup archive in `scripts/backups/` folder (only one backup file should be in the folder), go to `scripts` folder and run:
