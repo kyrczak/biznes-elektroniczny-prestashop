@@ -1,6 +1,6 @@
 #!/bin/bash
 
-docker exec presta-mariadb mysqldump --user=root --password=admin prestashop > ../shop/db_dump/db.sql
+docker exec db mysqldump --user=root --password=student BE_188618 > ../shop/db_dump/db.sql
 
 timestamp=$(date +%s)
 

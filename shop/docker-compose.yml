@@ -1,47 +1,47 @@
 version: '3'
+
 services:
   mariadb:
-    container_name: presta-mariadb
+    container_name: db
     image: mariadb:10
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: admin
-      MYSQL_DATABASE: prestashop
+      MYSQL_ROOT_PASSWORD: student
+      MYSQL_DATABASE: BE_188618
     volumes:
       - ./db_dump:/docker-entrypoint-initdb.d
       - ./mariadb:/var/lib/mysql
-
-  prestashop:
-    container_name: prestashop
-    image: prestashop/prestashop:1.7.8.10-apache
-    restart: always
-    depends_on:
-      - mariadb
     ports:
-      - 443:443
-      - 8080:80
+      - 3306:3306
+  memcached:
+    container_name: BE_188618_memcached
+    image: memcached
+  prestashop:
+    image: komeg1/be-prestashop-189642:1.0
+    ports:
+      - 18861:443
+    depends_on:
+      - memcached
     environment:
-      DB_SERVER: presta-mariadb
-      DB_NAME: prestashop
-      DB_USER: root
-      DB_PASSWD: admin
-      PS_INSTALL_AUTO: 0
-      PS_FOLDER_ADMIN: admin
-      PS_FOLDER_INSTALL: install  
-      PS_LANGUAGE: pl
-      PS_COUNTRY: PL
-      PS_DEV_MODE: 1
+      PS_DEV_MODE: 0
+    entrypoint: bash /db_dump/init_db.sh
     volumes:
       - ./prestashop/src:/var/www/html
       - ./prestashop.crt:/etc/ssl/certs/prestashop.crt
       - ./prestashop.key:/etc/ssl/private/prestashop.key
-      - ./prestashop_ssl.conf:/etc/apache2/sites-available/prestashop_ssl.conf
+      - ./prestashop_ssl.conf:/etc/apache2/sites-available/prestashop_ssl.con
     command: 
       - /bin/bash
       - -c
       - |
         cp /etc/ssl/certs/prestashop.crt /usr/local/share/ca-certificates/prestashop.crt
+        apt-get update 
+        apt-get install -y libmemcached-dev zlib1g-dev 
+        pecl install memcached 
+        docker-php-ext-enable memcached
         update-ca-certificates
         a2ensite prestashop_ssl
         a2enmod ssl
         apache2-foreground
+
+        
