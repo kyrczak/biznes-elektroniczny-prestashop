@@ -21,7 +21,10 @@ services:
     ports:
       - 18861:443
     depends_on:
+      - mariadb
       - memcached
+    ports:
+      - 18861:443
     environment:
       PS_DEV_MODE: 0
     entrypoint: bash /db_dump/init_db.sh
@@ -43,5 +46,3 @@ services:
         a2ensite prestashop_ssl
         a2enmod ssl
         apache2-foreground
-
-        
