@@ -22,7 +22,7 @@ services:
     depends_on:
       - memcached
     environment:
-      PS_DEV_MODE: 1
+      PS_DEV_MODE: 0
     deploy:
      restart_policy:
        condition: on-failure
