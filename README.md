@@ -1,8 +1,10 @@
-# Doncie Hermiony - Prestashop store project
+# Donice Hermiony - Prestashop store project
 College project for "Electronic Business" course. The goal was to create a store using Prestashop with scrapped products from a real web store.
 
 The products and images were gathered from [https://www.sklep-kwiecisty.pl/](https://www.sklep-kwiecisty.pl/). The data and images were scrapped using Scrapy. The data was then imported to Prestashop using a custom Python script.
 The website was deployed using Docker and tested on Linux (WSL Ubuntu) with Selenium.
+
+Ready to use image of the shop description is available on the [deploy](https://github.com/kyrczak/biznes-elektroniczny-prestashop/tree/deploy) branch
 
 # Table of contents
 - [Docker images](#docker-images)
